@@ -1,3 +1,20 @@
+"""
+See the NOTICE file distributed with this work for additional information
+regarding copyright ownership.
+
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 import logging
 
 from fastapi import APIRouter, HTTPException
@@ -20,36 +37,45 @@ async def get_sequence(checksum: str, start: str = "", end: str = ""):
     str start: Start point of the sequence defined in checksum.
     str end: End point of the sequence defined in checksum.
     """
+    headers = {"content-type": "accept=text/plain"}
+    params = {}
+    if start < end:
+        params = {"start": start, "end": end}
+    url_path = "sequence/" + checksum
     try:
-        query_string = "?"
-        if start < end:
-            query_string = f"?start={start}&end={end}&"
-        query_string = "sequence/" + checksum + query_string + "accept=text/plain"
         result = await create_request_coroutine(
-            metadata_url_list(checksum), query_string
+            url_list=metadata_url_list(checksum),
+            url_path=url_path,
+            headers=headers,
+            params=params,
         )
         if result == "":
             return HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Not Found")
 
         return result
     except Exception as e:
-        logger.log("INFO", "Unhandled exception in get_sequence" + str(e))
+        logger.log("DEBUG", "Unhandled exception in get_sequence" + str(e))
 
 
 @router.get("/{checksum}/metadata", name="sequence:metadata")
 async def get_sequence_metadata(checksum: str):
     """Return Refget sequence metadata based on checksum value."""
 
+    headers = {"content-type": "accept=application/json"}
+
+    url_path = "sequence/" + checksum + "/metadata"
     try:
-        query_string = "sequence/" + checksum + "/metadata?accept=application/json"
         result = await create_request_coroutine(
-            metadata_url_list(checksum), query_string
+            url_list=metadata_url_list(checksum),
+            url_path=url_path,
+            headers=headers,
+            params="",
         )
         if result == "":
             return HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Not Found")
         return result
     except Exception as e:
-        logger.log("INFO", "Unhandled exception in get_sequence_metadata" + str(e))
+        logger.log("DEBUG", "Unhandled exception in get_sequence_metadata" + str(e))
 
 
 def metadata_url_list(checksum):
@@ -59,7 +85,7 @@ def metadata_url_list(checksum):
     """
 
     url_list = [
-        (url, url + "sequence/" + checksum + "/metadata?accept=application/json")
+        (url, url + "sequence/" + checksum + "/metadata")
         for url in REFGET_SERVER_URL_LIST
     ]
     return url_list
