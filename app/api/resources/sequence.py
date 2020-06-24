@@ -31,7 +31,7 @@ router = APIRouter()
 
 
 @router.get("/{checksum}", name="sequence")
-async def get_sequence(checksum: str, start: str = "", end: str = ""):
+async def get_sequence(checksum: str, start: str = 0, end: str = 0):
     """
     Return Refget sequence based on checksum value.
     str start: Start point of the sequence defined in checksum.
@@ -69,7 +69,7 @@ async def get_sequence_metadata(checksum: str):
             url_list=metadata_url_list(checksum),
             url_path=url_path,
             headers=headers,
-            params="",
+            params={},
         )
         if result == "":
             return HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Not Found")
