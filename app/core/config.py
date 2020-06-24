@@ -16,6 +16,7 @@ limitations under the License.
 """
 
 import logging
+import os
 import sys
 from typing import List
 
@@ -28,10 +29,9 @@ from core.logging import InterceptHandler
 VERSION = "0.0.0"
 API_PREFIX = "/api"
 
-REFGET_SERVER_URL_LIST: List[str] = [
-    "https://www.ebi.ac.uk/ena/cram/",
-    "http://refget.herokuapp.com/",
-]
+REFGET_SERVER_URL_LIST: List[str] = list(
+    os.environ["REFGET_SERVER_URL_LIST"].split(",")
+)
 
 config = Config(".env")
 DEBUG: bool = config("DEBUG", cast=bool, default=False)

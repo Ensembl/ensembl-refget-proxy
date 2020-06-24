@@ -4,7 +4,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends netcat && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV PORT=8083
 EXPOSE 8083
 RUN mkdir app
 
