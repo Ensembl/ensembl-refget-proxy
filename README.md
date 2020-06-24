@@ -16,8 +16,10 @@ A working request sample working with current configurations:
 
 
 ## Deploy Notes
-You can add and modify refget server url list core/config.py
-- `REFGET_SERVER_URL_LIST`
+You can add and modify Refget server urls in `$REFGET_SERVER_URL_LIST` environment variable available in .env file. use `,` as separator.
+`REFGET_SERVER_URL_LIST=https://www.refget-server-sample1.info/,http://refget-server-sample2.info/`
+ 
+ 
 
 
 ## Development

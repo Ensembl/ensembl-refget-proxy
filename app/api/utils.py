@@ -37,12 +37,10 @@ async def find_result_url(session, url, headers):
             if response.status == 200:
                 url_result = url[0]
 
-    except (aiohttp.ClientResponseError, aiohttp.ClientConnectorError, Exception) as e:
+    except (aiohttp.ClientResponseError, aiohttp.ClientConnectorError):
         asyncio.current_task().remove_done_callback(asyncio.current_task)
         asyncio.current_task().cancel()
         url_result = ""
-
-        logger.log("DEBUG", "Unhandled exception in find_result_url" + str(e))
     return url_result
 
 
@@ -78,4 +76,4 @@ async def create_request_coroutine(url_list, url_path, headers, params):
 
     except Exception as e:
 
-        logger.log("DEBUG", "Unhandled exception in find_result_url" + str(e))
+        logger.log("DEBUG", "Unhandled exception in create_request_coroutine " + str(e))

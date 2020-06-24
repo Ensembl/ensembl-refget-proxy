@@ -31,7 +31,7 @@ router = APIRouter()
 
 
 @router.get("/{checksum}", name="sequence")
-async def get_sequence(checksum: str, start: str = 0, end: str = 0):
+async def get_sequence(checksum: str, start: int = 0, end: int = 0):
     """
     Return Refget sequence based on checksum value.
     str start: Start point of the sequence defined in checksum.
@@ -39,7 +39,7 @@ async def get_sequence(checksum: str, start: str = 0, end: str = 0):
     """
     headers = {"content-type": "accept=text/plain"}
     params = {}
-    if int(start) < int(end):
+    if start < end:
         params = {"start": start, "end": end}
     url_path = "sequence/" + checksum
     try:
@@ -54,7 +54,7 @@ async def get_sequence(checksum: str, start: str = 0, end: str = 0):
 
         return result
     except Exception as e:
-        logger.log("DEBUG", "Unhandled exception in get_sequence" + str(e))
+        logger.log("DEBUG", "Unhandled exception in get_sequence " + str(e))
 
 
 @router.get("/{checksum}/metadata", name="sequence:metadata")
@@ -75,7 +75,7 @@ async def get_sequence_metadata(checksum: str):
             return HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Not Found")
         return result
     except Exception as e:
-        logger.log("DEBUG", "Unhandled exception in get_sequence_metadata" + str(e))
+        logger.log("DEBUG", "Unhandled exception in get_sequence_metadata: " + str(e))
 
 
 def metadata_url_list(checksum):
