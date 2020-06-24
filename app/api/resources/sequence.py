@@ -39,7 +39,7 @@ async def get_sequence(checksum: str, start: str = "", end: str = ""):
     """
     headers = {"content-type": "accept=text/plain"}
     params = {}
-    if start < end:
+    if int(start) < int(end):
         params = {"start": start, "end": end}
     url_path = "sequence/" + checksum
     try:
