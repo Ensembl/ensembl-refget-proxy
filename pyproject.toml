@@ -3,7 +3,7 @@ name = "Ensembl_Refget_Proxy"
 version = "0.0.0"
 description = "Python application to proxy against Ensembl refget services."
 authors = ["Mehrnaz Charkhchi <mcharkhchi@ebi.ac.uk>"]
-license = "Apache License, Version 2.0"
+license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.8"
