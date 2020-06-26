@@ -16,7 +16,7 @@ limitations under the License.
 """
 
 import logging
-import os
+from os import environ
 import sys
 from typing import List
 
@@ -29,9 +29,7 @@ from core.logging import InterceptHandler
 VERSION = "0.0.0"
 API_PREFIX = "/api"
 
-REFGET_SERVER_URL_LIST: List[str] = list(
-    os.environ["REFGET_SERVER_URL_LIST"].split(",")
-)
+REFGET_SERVER_URL_LIST: List[str] = list(environ["REFGET_SERVER_URL_LIST"].split(","))
 
 config = Config(".env")
 DEBUG: bool = config("DEBUG", cast=bool, default=False)

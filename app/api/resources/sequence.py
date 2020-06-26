@@ -19,6 +19,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 from loguru import logger
+from starlette.datastructures import Headers
 from starlette.status import HTTP_404_NOT_FOUND
 
 from api.utils import create_request_coroutine
@@ -31,16 +32,18 @@ router = APIRouter()
 
 
 @router.get("/{checksum}", name="sequence")
-async def get_sequence(checksum: str, start: int = 0, end: int = 0):
+async def get_sequence(checksum: str, start: int = 0, end: int = 0, accept: str = ""):
     """
     Return Refget sequence based on checksum value.
     str start: Start point of the sequence defined in checksum.
     str end: End point of the sequence defined in checksum.
     """
-    headers = {"content-type": "accept=text/plain"}
-    params = {}
+    headers = Headers()
+    params = {"accept": accept}
+
     if start < end:
-        params = {"start": start, "end": end}
+        params["start"] = start
+        params["end"] = end
     url_path = "sequence/" + checksum
     try:
         result = await create_request_coroutine(
@@ -58,18 +61,17 @@ async def get_sequence(checksum: str, start: int = 0, end: int = 0):
 
 
 @router.get("/{checksum}/metadata", name="sequence:metadata")
-async def get_sequence_metadata(checksum: str):
+async def get_sequence_metadata(checksum: str, accept: str = ""):
     """Return Refget sequence metadata based on checksum value."""
 
-    headers = {"content-type": "accept=application/json"}
-
+    headers = Headers()
     url_path = "sequence/" + checksum + "/metadata"
     try:
         result = await create_request_coroutine(
             url_list=metadata_url_list(checksum),
             url_path=url_path,
             headers=headers,
-            params={},
+            params={accept: accept},
         )
         if result == "":
             return HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Not Found")
@@ -83,9 +85,12 @@ def metadata_url_list(checksum):
     Create and return a list of tuples containing:
     [("Refget server URL", "Generated metadata URL ")]
     """
+    url_list = []
+    for url in REFGET_SERVER_URL_LIST:
+        if url.endswith("/"):
+            url_list.append((url, url + "sequence/" + checksum + "/metadata"))
+        else:
+            url = url + "/"
+            url_list.append((url, url + "sequence/" + checksum + "/metadata"))
 
-    url_list = [
-        (url, url + "sequence/" + checksum + "/metadata")
-        for url in REFGET_SERVER_URL_LIST
-    ]
     return url_list
