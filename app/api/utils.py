@@ -19,7 +19,8 @@ import asyncio
 import logging
 
 import aiohttp
-from loguru import logger
+from aiohttp import ContentTypeError
+from fastapi import HTTPException
 
 from core.logging import InterceptHandler
 
@@ -68,12 +69,13 @@ async def create_request_coroutine(url_list, url_path, headers, params):
                         url=url + url_path, headers=headers, params=params
                     ) as response:
                         if response.status == 200:
-                            if headers.get("content-type", "") == "accept=text/plain":
+
+                            if response.headers.get("content-type").find("text") != -1:
                                 return await response.text()
                             else:
                                 return await response.json()
+
             return result
 
-    except Exception as e:
-
-        logger.log("DEBUG", "Unhandled exception in create_request_coroutine " + str(e))
+    except (ContentTypeError, Exception) as e:
+        return HTTPException(status_code=406)
