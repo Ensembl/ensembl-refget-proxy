@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "Ensembl_Refget_Proxy"
+version = "0.0.0"
+description = "Python application to proxy against Ensembl refget services."
+authors = ["Mehrnaz Charkhchi <mcharkhchi@ebi.ac.uk>"]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.57.0"
+pydantic = "^1.5.1"
+starlette = "^0.13.4"
+aiohttp = "^3.6.2"
+loguru = "^0.5.1"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
