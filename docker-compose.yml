@@ -28,7 +28,6 @@ services:
       - REFGET_SERVER_URL_LIST=${REFGET_SERVER_URL_LIST}
       - DEBUG=${DEBUG}
     container_name: refget_proxy_api
-    volumes:
-      - ./app/:/app/
     ports:
       - ${PORT}:${PORT}
+
