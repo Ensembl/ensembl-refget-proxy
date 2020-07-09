@@ -34,7 +34,7 @@ stages:
   - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
   - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
   variables:
-    DOCKER_TLS_CERTDIR: ""
+    DOCKERFILE: Dockerfile.prod
 
 # Run Tests
 #Test:
