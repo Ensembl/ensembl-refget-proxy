@@ -64,7 +64,8 @@ Feature:wp-feature:
   extends: .deploy-wp-feature
   variables:
     DEPLOY_TAG: ${CI_COMMIT_REF_SLUG}
-
+  environment:
+    name : hx
   only:
   - /^feature\/.*$/
-  when: manual
+  when: manual  
