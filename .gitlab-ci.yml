@@ -31,10 +31,9 @@ stages:
   - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
   - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
   - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-variables:
-  CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
-  DOCKERFILE: Dockerfile.prod
-  DOCKER_TLS_CERTDIR: ""
+  variables:
+    DOCKERFILE: Dockerfile.prod
+    DOCKER_TLS_CERTDIR: ""
 
 # Run Tests
 #Test:
