@@ -49,16 +49,16 @@ stages:
 Docker-IMG:feature:
   extends: .build
   variables:
-    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_SLUG}
     DOCKERFILE: Dockerfile.feature
 
   only:
   - /^feature\/.*$/
   - /^refactor\/.*$/
+
   when: manual
 
-
-Feature:EHK-HH:
+Feature:wp-feature:
   extends: .deploy-wp-feature
   variables:
     CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_SLUG}
