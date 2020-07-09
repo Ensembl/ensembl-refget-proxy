@@ -1,3 +1,5 @@
+variables:
+    DOCKER_TLS_CERTDIR: ""
 stages:
 #  - test
   - build_docker_image
@@ -32,7 +34,6 @@ stages:
   - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
   - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
   variables:
-    DOCKERFILE: Dockerfile.prod
     DOCKER_TLS_CERTDIR: ""
 
 # Run Tests
@@ -57,13 +58,13 @@ Docker-IMG:feature:
   - /^refactor\/.*$/
   when: manual
 
-#
-#Feature:wp-feature:
-#  extends: .deploy-wp-feature
-#  variables:
-#    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_SLUG}
-#    DEPLOY_TAG: ${CI_COMMIT_REF_SLUG}
-#    KUBE_CONTEXT: ens-dev-ctx
-#  only:
-#  - /^feature\/.*$/
-#  when: manual
+
+Feature:wp-feature:
+  extends: .deploy-wp-feature
+  variables:
+    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_SLUG}
+    DEPLOY_TAG: ${CI_COMMIT_REF_SLUG}
+    KUBE_CONTEXT: ens-dev-ctx
+  only:
+  - /^feature\/.*$/
+  when: manual
