@@ -56,5 +56,13 @@ Docker-IMG:feature:
   - /^feature\/.*$/
   - /^refactor\/.*$/
 
-  when: manual
 
+Feature:EHK-HH:
+  extends: .deploy-wp-feature
+  variables:
+    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_SLUG}
+    DEPLOY_TAG: ${CI_COMMIT_REF_SLUG}
+    KUBE_CONTEXT: ens-dev-ctx
+  only:
+  - /^feature\/.*$/
+  when: manual
