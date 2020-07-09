@@ -33,7 +33,7 @@ stages:
   - sed -i "s#<DOCKER_IMAGE>#${CONTAINER_IMAGE}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
   - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
   - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
-  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
+#  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
   - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
   variables:
     DOCKERFILE: Dockerfile.prod
@@ -68,4 +68,4 @@ Feature:wp-feature:
     name : hx
   only:
   - /^feature\/.*$/
-  when: manual  
+  when: manual

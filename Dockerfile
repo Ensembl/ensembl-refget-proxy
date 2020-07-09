@@ -15,9 +15,9 @@
 #
 
 FROM tiangolo/uvicorn-gunicorn:python3.8
-ENV PORT 8080
+ENV PORT 8083
 
-EXPOSE 8080
+EXPOSE 8083
 RUN apt-get update && \
     apt-get install -y --no-install-recommends netcat && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
