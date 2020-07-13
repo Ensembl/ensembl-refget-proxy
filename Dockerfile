@@ -22,11 +22,11 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends netcat && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir app
+# RUN mkdir app
 
 WORKDIR /app
 
-COPY ./app /app
+COPY ./app /app/app
 
 COPY poetry.lock pyproject.toml ./
 RUN pip install poetry==1.0.* && \
