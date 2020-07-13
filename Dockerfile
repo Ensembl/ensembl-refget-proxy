@@ -26,7 +26,7 @@ RUN mkdir app
 
 WORKDIR /app
 
-COPY ./app /app/app
+COPY ./app/ /app/
 
 COPY poetry.lock pyproject.toml ./
 RUN pip install poetry==1.0.* && \
