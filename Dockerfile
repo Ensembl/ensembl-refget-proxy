@@ -16,7 +16,7 @@
 
 FROM tiangolo/uvicorn-gunicorn:python3.8
 ENV PORT 8083
-
+ENV REFGET_SERVER_URL_LIST https://www.ebi.ac.uk/ena/cram/,http://refget.herokuapp.com/
 EXPOSE 8083
 RUN apt-get update && \
     apt-get install -y --no-install-recommends netcat && \
