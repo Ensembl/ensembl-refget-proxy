@@ -33,4 +33,4 @@ RUN pip install poetry==1.0.* && \
     poetry config virtualenvs.create false && \
     poetry install --no-dev
 
-CMD gunicorn -w 4 --bind=0.0.0.0:8083 --preload -t 120 main:app uvicorn.workers.UvicornWorker config.asgi:application
+# CMD gunicorn -w 4 --bind=0.0.0.0:8083 --preload -t 120 main:app uvicorn.workers.UvicornWorker config.asgi:application
