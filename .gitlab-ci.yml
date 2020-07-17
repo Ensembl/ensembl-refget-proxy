@@ -21,6 +21,8 @@ stages:
 Test:
   stage: test
   image: tiangolo/uvicorn-gunicorn:python3.8
+  before_script:
+    - pip install fastapi==0.57.0
   variables:
     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
   script:
