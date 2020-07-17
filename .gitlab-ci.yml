@@ -46,7 +46,7 @@ Test:
   variables:
     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
   script:
-    - python -m unittest discover -s app/tests
+    - python -m unittest discover -s tests
 
 
 Docker-IMG:feature:
