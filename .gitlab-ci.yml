@@ -1,3 +1,7 @@
+variables:
+    DOCKER_TLS_CERTDIR: ""
+    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+
 stages:
   - build_docker_image
   - test
@@ -12,10 +16,27 @@ stages:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker build -t ${CONTAINER_IMAGE} --no-cache -f .
+    - docker build -t ${CONTAINER_IMAGE} --no-cache .
     - docker push ${CONTAINER_IMAGE}
     - docker rmi ${CONTAINER_IMAGE}
     - docker logout $CI_REGISTRY
+
+# Template to deploy to WP k8s cluster
+
+.deploy-wp-feature:
+  stage: deploy
+  image: dockerhub.ebi.ac.uk/kamal/deploy-tools:0.1
+
+  script:
+  - git clone https://gitlab.ebi.ac.uk/kamal/ensembl-client-caas-deploy.git
+  - git -C ensembl-client-caas-deploy/ checkout ensembl_refget_proxy_caas_deploy
+  - sed -i "s#<DOCKER_IMAGE>#${CONTAINER_IMAGE}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
+  - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
+  - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
+  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
+  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
+  variables:
+    DOCKERFILE: Dockerfile.prod
 
 # Run Tests
 Test:
@@ -27,35 +48,24 @@ Test:
   script:
     - python -m unittest discover -s app/tests
 
-# Template to deploy to WP k8s cluster
-.deploy-wp-feature:
-  stage: deploy
-  image: dockerhub.ebi.ac.uk/kamal/deploy-tools:0.1
 
-  script:
-  - git clone https://gitlab.ebi.ac.uk/kamal/ensembl-client-caas-deploy.git
-  - git -C ensembl-client-caas-deploy/ checkout ensembl_refget_proxy_caas_deploy
-  - sed -i "s#<DOCKER_IMAGE>#${CONTAINER_IMAGE}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-  - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-  - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
-  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
-  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-variables:
-  CONTAINER_IMAGE: $GITLAB_REGISTRY_URL/$GITLAB_REGISTRY_NAMESPACE/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}
-  DOCKERFILE: Dockerfile.prod
-  DOCKER_TLS_CERTDIR: ""
-
-# Build docker image for feature_branch environment
 Docker-IMG:feature:
   extends: .build
-  environment:
-    name: hx
   variables:
-    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_SLUG}
     DOCKERFILE: Dockerfile.feature
 
   only:
   - /^feature\/.*$/
   - /^refactor\/.*$/
+  when: manual
 
+
+Feature:wp-feature:
+  extends: .deploy-wp-feature
+  variables:
+    DEPLOY_TAG: ${CI_COMMIT_REF_SLUG}
+  environment:
+    name : hx
+  only:
+  - /^feature\/.*$/
   when: manual
