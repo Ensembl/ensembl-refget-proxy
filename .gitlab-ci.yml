@@ -50,8 +50,7 @@ Test:
     - pip install poetry==1.0.*
     - poetry config virtualenvs.create false
     - poetry install --no-dev
-    - echo $REFGET_SERVER_URL_LIST
-    - python -m unittest tests
+    - python -m unittest discover -s tests
 
 
 Docker-IMG:feature:
