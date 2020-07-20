@@ -2,7 +2,7 @@ import unittest
 
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 
 
 class APITestCase(unittest.TestCase):
@@ -14,6 +14,7 @@ class APITestCase(unittest.TestCase):
 
     def test_404_error_in_none_relative_requests(self):
         response = self.client.get("api/")
+
         assert response.status_code == 404
 
     def test_api_error_405_page(self):
