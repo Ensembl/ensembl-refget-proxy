@@ -50,9 +50,9 @@ Test:
     - pip install poetry==1.0.*
     - poetry config virtualenvs.create false
     - poetry install --no-dev
-    - cp -R ./tests/ .
     - cp -R ./app/ /app/
     - cd /app
+    - cp -R ./tests/ .
     - python -m unittest
 
 
