@@ -9,7 +9,9 @@ from main import app
 class APITestCase(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
+        self.api_prefix = 'api'
         self.sequence_url_prefix = "api/sequence/"
+        self.metadata_url_prefix = "/metadata/"
         self.checksum = "6681ac2f62509cfc220d78751b8dc524"
         self.url = self.sequence_url_prefix + self.checksum
 
@@ -32,7 +34,8 @@ class APITestCase(unittest.TestCase):
         assert put_response.status_code == 405
 
     def test_metadata_url_list(self):
-        assert metadata_url_list(self.checksum) == [('http://hx-rke-wp-webadmin-14-worker-1.caas.ebi.ac.uk:31136/',)]
+        assert metadata_url_list(self.checksum) == [('http://hx-rke-wp-webadmin-14-worker-1.caas.ebi.ac.uk:31136/', 'http://hx-rke-wp-webadmin-14-worker-1.caas.ebi.ac.uk:31136/sequence/6681ac2f62509cfc220d78751b8dc524/metadata')]
+
 
 if __name__ == "__main__":
     unittest.main()
