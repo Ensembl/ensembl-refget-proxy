@@ -1,16 +1,11 @@
 import unittest
 
-from fastapi.testclient import TestClient
 from starlette.datastructures import CommaSeparatedStrings
 
-from core import config
-from main import app
+from app.core import config
 
 
 class ConfigTestCase(unittest.TestCase):
-    def setUp(self):
-        self.client = TestClient(app)
-
     def test_environment_variables(self):
         assert type(config.ALLOWED_HOSTS) == CommaSeparatedStrings
         assert type(config.REFGET_SERVER_URL_LIST) == list
