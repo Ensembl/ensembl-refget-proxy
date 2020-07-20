@@ -50,6 +50,7 @@ Test:
     - pip install poetry==1.0.*
     - poetry config virtualenvs.create false
     - poetry install --no-dev
+    - cd /app
     - python -m unittest discover -s tests
 
 

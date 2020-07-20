@@ -2,7 +2,7 @@ import unittest
 
 from starlette.datastructures import CommaSeparatedStrings
 
-from app.core import config
+from core import config
 
 
 class ConfigTestCase(unittest.TestCase):

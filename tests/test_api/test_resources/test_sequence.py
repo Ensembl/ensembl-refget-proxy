@@ -2,7 +2,8 @@ import unittest
 
 from fastapi.testclient import TestClient
 
-from app.main import app
+from api.resources.sequence import metadata_url_list
+from main import app
 
 
 class APITestCase(unittest.TestCase):
@@ -30,6 +31,8 @@ class APITestCase(unittest.TestCase):
         put_response = self.client.put(self.url)
         assert put_response.status_code == 405
 
+    def test_metadata_url_list(self):
+        assert metadata_url_list(self.checksum) == [('http://hx-rke-wp-webadmin-14-worker-1.caas.ebi.ac.uk:31136/',)]
 
 if __name__ == "__main__":
     unittest.main()
