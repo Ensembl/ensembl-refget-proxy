@@ -3,8 +3,8 @@ variables:
     CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
 
 stages:
-  - build_docker_image
   - test
+  - build_docker_image
   - deploy
 
 # Template to build to docker image
@@ -40,12 +40,16 @@ stages:
 
 # Run Tests
 Test:
-  extends: .build
   stage: test
+
+  image: python:3.7.2
 
   variables:
     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
   script:
+    - pip install poetry==1.0.*
+    - poetry config virtualenvs.create false
+    - poetry install --no-dev
     - python -m unittest discover -s tests
 
 
