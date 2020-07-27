@@ -57,9 +57,9 @@ Test:
     - gunicorn -w 4 --bind=0.0.0.0:8083 --preload -t 120 main:app uvicorn.workers.UvicornWorker config.asgi:application
     - refget-compliance report -s http://0.0.0.0:8083/api/ --json server.json
     - cat server.json
-  only:
-    changes:
-      - server.json
+#  only:
+#    changes:
+#      - server.json
 
 
 Docker-IMG:feature:
