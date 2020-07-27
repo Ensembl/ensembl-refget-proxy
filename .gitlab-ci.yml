@@ -51,7 +51,6 @@ Test:
     - pip install poetry==1.0.*
     - poetry config virtualenvs.create false
     - poetry install --no-dev
-    - mkdir app
     - cp -R ./app/ /app/
     - python -m unittest
     - pip install refget-compliance
