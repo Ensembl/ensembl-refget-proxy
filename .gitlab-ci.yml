@@ -42,7 +42,7 @@ stages:
 Test:
   stage: test
 
-  image: tiangolo/uvicorn-gunicorn:python3.8
+  image: python:3.8
 
   variables:
     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
@@ -52,7 +52,10 @@ Test:
     - poetry config virtualenvs.create false
     - poetry install --no-dev
     - cp -R ./app/ /app/
+    - cd /app
     - python -m unittest
+    - pip install uvicorn
+    - pip install gunicorn
     - pip install refget-compliance
     - gunicorn -w 4 --bind=0.0.0.0:8083 --preload -t 120 main:app uvicorn.workers.UvicornWorker config.asgi:application
     - refget-compliance report -s http://0.0.0.0:8083/api/ --json server.json
