@@ -17,11 +17,16 @@ limitations under the License.
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from aiohttp import ClientResponseError
+from fastapi import APIRouter, Request
 from loguru import logger
-from starlette.datastructures import Headers
-from starlette.status import HTTP_404_NOT_FOUND
 
+from api.error_response import (
+    http_404_not_found,
+    http_406_not_acceptable,
+    http_416_range_not_satisfied,
+    http_400_bad_request, response_error_handler,
+)
 from api.utils import create_request_coroutine
 from core.config import REFGET_SERVER_URL_LIST
 from core.logging import InterceptHandler
@@ -32,18 +37,15 @@ router = APIRouter()
 
 
 @router.get("/{checksum}", name="sequence")
-async def get_sequence(checksum: str, start: int = 0, end: int = 0, accept: str = ""):
+async def get_sequence(request: Request, checksum: str):
     """
     Return Refget sequence based on checksum value.
     str start: Start point of the sequence defined in checksum.
     str end: End point of the sequence defined in checksum.
     """
-    headers = Headers()
-    params = {"accept": accept}
+    params = request.query_params
+    headers = {}
 
-    if start < end:
-        params["start"] = start
-        params["end"] = end
     url_path = "sequence/" + checksum
     try:
         result = await create_request_coroutine(
@@ -52,32 +54,43 @@ async def get_sequence(checksum: str, start: int = 0, end: int = 0, accept: str 
             headers=headers,
             params=params,
         )
-        if result == "":
-            return HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Not Found")
 
-        return result
-    except Exception as e:
-        logger.log("DEBUG", "Unhandled exception in get_sequence " + str(e))
+        if type(result) == str:
+            return result
+        elif not result:
+            return http_404_not_found()
+        elif result.status:
+            return response_error_handler(result)
+
+    except (ClientResponseError, Exception) as e:
+        logger.log("DEBUG", e)
 
 
 @router.get("/{checksum}/metadata", name="sequence:metadata")
-async def get_sequence_metadata(checksum: str, accept: str = ""):
+async def get_sequence_metadata(request: Request, checksum: str):
     """Return Refget sequence metadata based on checksum value."""
 
-    headers = Headers()
     url_path = "sequence/" + checksum + "/metadata"
     try:
+        params = request.query_params
+        headers = {}
+
         result = await create_request_coroutine(
             url_list=metadata_url_list(checksum),
             url_path=url_path,
             headers=headers,
-            params={accept: accept},
+            params=params,
         )
-        if result == "":
-            return HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Not Found")
-        return result
-    except Exception as e:
-        logger.log("DEBUG", "Unhandled exception in get_sequence_metadata: " + str(e))
+        if type(result) == dict:
+            return result
+        elif not result:
+            return http_404_not_found()
+        elif result.status:
+            return response_error_handler(result)
+
+    except (ClientResponseError, Exception) as e:
+
+        logger.log("DEBUG", e)
 
 
 def metadata_url_list(checksum):
