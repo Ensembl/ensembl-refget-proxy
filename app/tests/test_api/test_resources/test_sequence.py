@@ -1,6 +1,7 @@
 import unittest
 
 from fastapi.testclient import TestClient
+from loguru import logger
 
 from main import app
 
@@ -23,6 +24,7 @@ class APITestCase(unittest.TestCase):
 
     def test_api_error_404(self):
         get_response = self.client.get(self.sequence_not_found_path)
+        logger.log('DEBUG', get_response)
         assert get_response.status_code == 404
 
     def test_api_error_405(self):
