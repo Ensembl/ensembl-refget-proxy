@@ -46,6 +46,7 @@ Test:
 
   variables:
     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
+    DEBUG: 'True'
   script:
     - pip install poetry==1.0.*
     - poetry config virtualenvs.create false
