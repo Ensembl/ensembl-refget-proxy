@@ -61,8 +61,9 @@ Compliance-Test:
   image: python:3.8
   script:
     - pip install refget-compliance
-    - refget-compliance report -s http://dev.refget.review.ensembl.org /api/ --json server.json
+    - refget-compliance report -s http://dev.refget.review.ensembl.org/api/ --json server.json
     - cat server.json
+  when: manual
 
 Docker-IMG:feature:
   extends: .build
