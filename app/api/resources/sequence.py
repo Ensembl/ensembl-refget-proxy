@@ -18,14 +18,12 @@ limitations under the License.
 import logging
 
 from aiohttp import ClientResponseError
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, responses
 from loguru import logger
 
 from api.error_response import (
     http_404_not_found,
-    http_406_not_acceptable,
-    http_416_range_not_satisfied,
-    http_400_bad_request, response_error_handler,
+    response_error_handler,
 )
 from api.utils import create_request_coroutine
 from core.config import REFGET_SERVER_URL_LIST
@@ -36,7 +34,7 @@ logging.getLogger().handlers = [InterceptHandler()]
 router = APIRouter()
 
 
-@router.get("/{checksum}", name="sequence")
+@router.get("/{checksum}", name="sequence", response_class=responses.PlainTextResponse)
 async def get_sequence(request: Request, checksum: str):
     """
     Return Refget sequence based on checksum value.
@@ -45,7 +43,7 @@ async def get_sequence(request: Request, checksum: str):
     """
     params = request.query_params
     headers = {}
-
+    headers = {i: request.headers.get(i) for i in request.headers}
     url_path = "sequence/" + checksum
     try:
         result = await create_request_coroutine(
@@ -54,11 +52,12 @@ async def get_sequence(request: Request, checksum: str):
             headers=headers,
             params=params,
         )
-
-        if type(result) == str:
-            return result
-        elif not result:
+        logger.log("DEBUG", "=====" + str(result))
+        logger.log("DEBUG", "========" + str(headers))
+        if not result:
             return http_404_not_found()
+        elif type(result) == str:
+            return responses.Response(result)
         elif result.status:
             return response_error_handler(result)
 
@@ -81,6 +80,7 @@ async def get_sequence_metadata(request: Request, checksum: str):
             headers=headers,
             params=params,
         )
+
         if type(result) == dict:
             return result
         elif not result:

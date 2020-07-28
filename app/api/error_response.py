@@ -1,6 +1,5 @@
 import json
 
-from loguru import logger
 from starlette.responses import PlainTextResponse
 from starlette.status import (
     HTTP_404_NOT_FOUND,
@@ -20,6 +19,8 @@ def response_error_handler(result):
         return http_406_not_acceptable()
     if result.status == 400:
         return http_400_bad_request()
+    if result.status == 501:
+        return http_501_not_implemented()
 
 
 def http_400_bad_request():
@@ -57,6 +58,6 @@ def http_416_range_not_satisfied():
 
 def http_501_not_implemented():
     response_msg = json.dumps(
-        {"status_code": HTTP_501_NOT_IMPLEMENTED, "details": "Not Implemented",}
+        {"status_code": HTTP_501_NOT_IMPLEMENTED, "details": "Not Implemented", }
     )
     return PlainTextResponse(response_msg, status_code=HTTP_501_NOT_IMPLEMENTED)

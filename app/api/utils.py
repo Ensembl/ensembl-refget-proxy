@@ -68,7 +68,7 @@ async def create_request_coroutine(url_list, url_path, headers, params):
                     async with session.get(
                             url=url + url_path, params=params, headers=headers
                     ) as response:
-
+                        logger.log("DEBUG", "=====" + str(response))
                         if response.status == 200:
 
                             if response.headers.get("content-type").find("text") != -1:
@@ -77,9 +77,8 @@ async def create_request_coroutine(url_list, url_path, headers, params):
                             else:
 
                                 return await response.json()
-                        else:
-                            return None
 
+                        return ''
 
     except Exception as e:
         logger.log('DEBUG', 'UNHANDLED EXCEPTION' + str(e))
