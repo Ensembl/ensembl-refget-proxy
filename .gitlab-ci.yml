@@ -6,6 +6,7 @@ stages:
   - test
   - build_docker_image
   - deploy
+  - compliance
 
 # Template to build to docker image
 .build:
@@ -46,7 +47,6 @@ Test:
 
   variables:
     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
-    DEBUG: 'True'
   script:
     - pip install poetry==1.0.*
     - poetry config virtualenvs.create false
@@ -54,14 +54,15 @@ Test:
     - cp -R ./app/ /app/
     - cd /app
     - python -m unittest
-#    - pip install uvicorn
-#    - pip install gunicorn
-#    - pip install refget-compliance
-#    - gunicorn -w 1 --bind=0.0.0.0:8083 --preload -t 120 main:app uvicorn.workers.UvicornWorker config.asgi:application --daemon
-#    - refget-compliance report -s http://localhost:8083/api/ --json server.json
-#    - cat server.json
 
 
+Compliance-Test:
+  stage: compliance
+  image: python:3.8
+  script:
+    - pip install refget-compliance
+    - refget-compliance report -s http://dev.refget.review.ensembl.org /api/ --json server.json
+    - cat server.json
 
 Docker-IMG:feature:
   extends: .build
