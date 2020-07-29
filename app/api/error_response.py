@@ -11,16 +11,25 @@ from starlette.status import (
 
 
 def response_error_handler(result):
-    if result.status == 501:
+    if result["status"] == 501:
         return http_501_not_implemented()
-    if result.status == 416:
+    if result["status"] == 416:
         return http_416_range_not_satisfied()
-    if result.status == 406:
+    if result["status"] == 406:
         return http_406_not_acceptable()
-    if result.status == 400:
+    if result["status"] == 400:
         return http_400_bad_request()
-    if result.status == 501:
+    if result["status"] == 501:
         return http_501_not_implemented()
+    if result["status"] == 404:
+        return http_404_not_found()
+    else:
+        return http_unknown_error(result)
+
+
+def http_unknown_error(result):
+    response_msg = json.dumps({"status_code": result["status"], "details": "Unknown"})
+    return PlainTextResponse(response_msg, status_code=result["status"])
 
 
 def http_400_bad_request():
@@ -58,6 +67,6 @@ def http_416_range_not_satisfied():
 
 def http_501_not_implemented():
     response_msg = json.dumps(
-        {"status_code": HTTP_501_NOT_IMPLEMENTED, "details": "Not Implemented", }
+        {"status_code": HTTP_501_NOT_IMPLEMENTED, "details": "Not Implemented",}
     )
     return PlainTextResponse(response_msg, status_code=HTTP_501_NOT_IMPLEMENTED)

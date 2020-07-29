@@ -21,10 +21,7 @@ from aiohttp import ClientResponseError
 from fastapi import APIRouter, Request, responses
 from loguru import logger
 
-from api.error_response import (
-    http_404_not_found,
-    response_error_handler,
-)
+from api.error_response import response_error_handler
 from api.utils import create_request_coroutine
 from core.config import REFGET_SERVER_URL_LIST
 from core.logging import InterceptHandler
@@ -42,7 +39,6 @@ async def get_sequence(request: Request, checksum: str):
     str end: End point of the sequence defined in checksum.
     """
     params = request.query_params
-    headers = {}
     headers = {i: request.headers.get(i) for i in request.headers}
     url_path = "sequence/" + checksum
     try:
@@ -52,13 +48,9 @@ async def get_sequence(request: Request, checksum: str):
             headers=headers,
             params=params,
         )
-        logger.log("DEBUG", "=====" + str(result))
-        logger.log("DEBUG", "========" + str(headers))
-        if not result:
-            return http_404_not_found()
-        elif type(result) == str:
-            return responses.Response(result)
-        elif result.status:
+        if result["status"] == 200:
+            return responses.Response(result["response"], headers=result["headers"])
+        else:
             return response_error_handler(result)
 
     except (ClientResponseError, Exception) as e:
@@ -72,7 +64,7 @@ async def get_sequence_metadata(request: Request, checksum: str):
     url_path = "sequence/" + checksum + "/metadata"
     try:
         params = request.query_params
-        headers = {}
+        headers = {i: request.headers.get(i) for i in request.headers}
 
         result = await create_request_coroutine(
             url_list=metadata_url_list(checksum),
@@ -81,12 +73,10 @@ async def get_sequence_metadata(request: Request, checksum: str):
             params=params,
         )
 
-        if type(result) == dict:
-            return result
-        elif not result:
-            return http_404_not_found()
-        elif result.status:
+        if result["status"] != 200:
             return response_error_handler(result)
+        else:
+            return responses.Response(result["response"], headers=result["headers"])
 
     except (ClientResponseError, Exception) as e:
 
