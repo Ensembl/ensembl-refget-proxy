@@ -14,12 +14,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+import fastapi_plugins
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from api.resources.routes import router
-from core.config import API_PREFIX, ALLOWED_HOSTS, VERSION, PROJECT_NAME, DEBUG
+from core.config import API_PREFIX, ALLOWED_HOSTS, VERSION, PROJECT_NAME, DEBUG, config
 
 
 def get_application() -> FastAPI:
@@ -38,4 +38,20 @@ def get_application() -> FastAPI:
     return application
 
 
+# class AppSettings(config, fastapi_plugins.RedisSettings):
+#     api_name: str = str(__name__)
+#
+
 app = get_application()
+# config = AppSettings()
+
+
+# @app.on_event('startup')
+# async def on_startup() -> None:
+#     await fastapi_plugins.redis_plugin.init_app(app)
+#     await fastapi_plugins.redis_plugin.init()
+#
+#
+# @app.on_event('shutdown')
+# async def on_shutdown() -> None:
+#     await fastapi_plugins.redis_plugin.terminate()

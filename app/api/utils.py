@@ -50,37 +50,44 @@ async def create_request_coroutine(url_list, url_path, headers, params):
     Create coroutine requests with asyncio to return Refget result based on metadata result.
     url_list [(tuple)]: Metadata URL list
     """
-    response_dict = {"response": "", "headers": {}, "status": 404}
     try:
         async with aiohttp.ClientSession(
-            raise_for_status=True, read_timeout=None, trust_env=True
+                raise_for_status=True, read_timeout=None, trust_env=True
         ) as session:
             coroutines = [
                 asyncio.ensure_future(find_result_url(session=session, url=url))
                 for url in url_list
             ]
             done, pending = await asyncio.wait(coroutines)
-            for task in done:
-                if not task.cancelled():
-                    url = task.result()
-                    async with session.get(
-                        url=url + url_path, params=params, headers=headers,
-                    ) as response:
-                        response_dict["status"] = response.status
-                        if response.status == 200:
-                            if response.headers.get("content-type").find("text") != -1:
-                                response_dict["response"] = await response.text()
-                                response_dict["headers"] = response.headers
-                            else:
-                                response_dict["response"] = await response.text()
-                                response_dict["headers"] = response.headers
-                        else:
-                            response_dict["status"] = response.status
-
-                return response_dict
-
-    except ClientResponseError as client_error:
-        return {"response": "", "headers": {}, "status": client_error.status}
+            return await get_result(done=done, session=session, url_path=url_path, headers=headers, params=params)
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
         return e
+
+
+async def get_result(done, session, url_path, headers, params):
+    """
+    Create coroutine requests with asyncio to return Refget result based on metadata result.
+    """
+    response_dict = {"response": "", "headers": {}, "status": 404}
+    for task in done:
+        if not task.cancelled():
+            url = task.result()
+            try:
+                async with session.get(
+                        url=url + url_path, params=params, headers=headers,
+                ) as response:
+                    if response.status == 200:
+                        response_dict["headers"] = response.headers
+                        response_dict["status"] = response.status
+                        if response.headers.get("content-type").find("text") != -1:
+                            response_dict["response"] = await response.text()
+                        else:
+                            response_dict["response"] = await response.text()
+                        return response_dict
+                    else:
+                        response_dict["status"] = response.status
+            except ClientResponseError as client_error:
+                response_dict["status"] = client_error.status
+
+    return response_dict
