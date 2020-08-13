@@ -22,6 +22,16 @@ stages:
     - docker rmi ${CONTAINER_IMAGE}
     - docker logout $CI_REGISTRY
 
+.deploy-wp:
+  stage: deploy
+  image: dockerhub.ebi.ac.uk/kamal/deploy-tools:0.1
+
+  script:
+  - git clone https://gitlab.ebi.ac.uk/kamal/ensembl-client-caas-deploy.git
+  - git -C ensembl-k8s-manifests/ checkout ensembl_refget_proxy_caas_deploy
+  - sed -i "s#<DOCKER_IMAGE>#${CONTAINER_IMAGE}#g" ensembl-k8s-manifests/ensembl_refget_proxy_deployment.yaml
+  - kubectl apply -f ensembl-k8s-manifests/ensembl_refget_proxy_deployment.yaml
+
 # Template to deploy to WP k8s cluster
 
 .deploy-wp-feature:
@@ -65,6 +75,15 @@ Compliance-Test:
     - cat server.json
   when: manual
 
+# Deploy staging to WP-HX cluster
+Staging:WP-HX:
+  extends: .deploy-wp
+  environment:
+    name : wp-hx-staging
+
+  only:
+  - dev
+
 Docker-IMG:feature:
   extends: .build
   variables:
@@ -85,3 +104,4 @@ Feature:wp-feature:
   only:
   - /^feature\/.*$/
   when: manual
+
