@@ -71,7 +71,7 @@ Compliance-Test:
   image: python:3.8
   script:
     - pip install refget-compliance
-    - refget-compliance report -s ${CI_COMMIT_REF_SLUG}.dev.refget.review.ensembl.org/api/ --json server.json
+    - refget-compliance report -s http://${CI_COMMIT_REF_SLUG}.dev.refget.review.ensembl.org/api/ --json server.json
     - cat server.json
   when: manual
 
