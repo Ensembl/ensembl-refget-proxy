@@ -24,12 +24,14 @@ from loguru import logger
 from starlette.config import Config
 from starlette.datastructures import CommaSeparatedStrings
 
-from core.logging import InterceptHandler
+from .logging import InterceptHandler
 
 VERSION = "0.0.0"
 API_PREFIX = "/api"
 
-REFGET_SERVER_URL_LIST: List[str] = list(environ["REFGET_SERVER_URL_LIST"].split(","))
+REFGET_SERVER_URL_LIST: List[str] = list(
+    environ.get("REFGET_SERVER_URL_LIST", "").split(",")
+)
 
 config = Config(".env")
 DEBUG: bool = config("DEBUG", cast=bool, default=False)
