@@ -42,7 +42,7 @@ class APISequenceTestCase(unittest.TestCase):
         get_response = self.client.get(self.sequence_not_found_path)
         assert get_response.status_code == 404
 
-    def test_sequence_api_error_405(self):
+    def test_api_error_405(self):
         post_response = self.client.post(self.sequence_path)
         assert post_response.status_code == 405
 
@@ -65,6 +65,21 @@ class APISequenceTestCase(unittest.TestCase):
     def test_sequence_api_416_range_not_satisfied(self):
         get_response = self.client.get(self.sequence_path + "?start=12&end=10")
         assert get_response.status_code == 416
+
+    def test_sequence_metadata_api_success_200(self):
+        get_response = self.client.get(self.sequence_path + self.metadata_url_prefix)
+        assert get_response.status_code == 200
+        assert len(get_response.json()) == 1
+        assert type(get_response.json()) == dict
+        assert get_response.json() == {
+            "metadata": {
+                "id": "6681ac2f62509cfc220d78751b8dc524",
+                "md5": "6681ac2f62509cfc220d78751b8dc524",
+                "trunc512": None,
+                "length": 230218,
+                "aliases": [],
+            }
+        }
 
     def test_metadata_url_list(self):
         assert metadata_url_list(self.checksum) == [
