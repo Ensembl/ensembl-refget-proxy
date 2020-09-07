@@ -71,6 +71,7 @@ class APISequenceTestCase(unittest.TestCase):
         assert get_response.status_code == 200
         assert len(get_response.json()) == 1
         assert type(get_response.json()) == dict
+        print(get_response.json())
         assert get_response.json() == {
             "metadata": {
                 "id": "6681ac2f62509cfc220d78751b8dc524",
