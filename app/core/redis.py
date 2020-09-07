@@ -75,7 +75,7 @@ async def get_cached_metadata(metadata_checksum):
         async with RedisConnection() as redis:
             result = await asyncio.ensure_future(redis.get(metadata_checksum))
             if result:
-                return dict(pickle.loads(result))
+                return dict(pickle.loads(result, encoding="utf-8"))
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
