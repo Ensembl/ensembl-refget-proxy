@@ -65,7 +65,7 @@ Test:
     - cd /app
     - python -m unittest
 
-
+# Run Compliance Test on refget url
 Compliance-Test:
   stage: compliance
   image: python:3.8
