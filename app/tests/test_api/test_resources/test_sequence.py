@@ -71,14 +71,18 @@ class APISequenceTestCase(unittest.TestCase):
         assert get_response.status_code == 200
         assert len(get_response.json()) == 1
         assert type(get_response.json()) == dict
-        print(get_response.json())
         assert get_response.json() == {
             "metadata": {
-                "id": "6681ac2f62509cfc220d78751b8dc524",
-                "md5": "6681ac2f62509cfc220d78751b8dc524",
-                "trunc512": None,
+                "aliases": [
+                    {
+                        "alias": "ga4gh:SQ.lZyxiD_ByprhOUzrR1o1bq0ezO_1gkrn",
+                        "naming_authority": "ga4gh",
+                    },
+                    {"alias": "I", "naming_authority": "unknown"},
+                ],
                 "length": 230218,
-                "aliases": [],
+                "md5": "6681ac2f62509cfc220d78751b8dc524",
+                "trunc512": "959cb1883fc1ca9ae1394ceb475a356ead1ecceff5824ae7",
             }
         }
 
