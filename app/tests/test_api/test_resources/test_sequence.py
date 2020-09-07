@@ -82,14 +82,20 @@ class APISequenceTestCase(unittest.TestCase):
         }
 
     def test_metadata_url_list(self):
-        assert metadata_url_list(self.checksum) == [
-            {
-                "refget_server_url": self.refget_url,
-                "checksum": "6681ac2f62509cfc220d78751b8dc524",
-                "metadata_url": self.refget_url
-                + "sequence/6681ac2f62509cfc220d78751b8dc524/metadata",
+        assert metadata_url_list(self.checksum) == {
+            "metadata": {
+                "aliases": [
+                    {
+                        "alias": "ga4gh:SQ.lZyxiD_ByprhOUzrR1o1bq0ezO_1gkrn",
+                        "naming_authority": "ga4gh",
+                    },
+                    {"alias": "I", "naming_authority": "unknown"},
+                ],
+                "length": 230218,
+                "md5": "6681ac2f62509cfc220d78751b8dc524",
+                "trunc512": "959cb1883fc1ca9ae1394ceb475a356ead1ecceff5824ae7",
             }
-        ]
+        }
 
 
 if __name__ == "__main__":
