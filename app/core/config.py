@@ -34,6 +34,7 @@ REFGET_SERVER_URL_LIST: List[str] = list(
 
 REDIS_HOST: str = environ.get("REDIS_HOST")
 REDIS_PORT: str = environ.get("REDIS_PORT")
+
 config = Config(".env")
 DEBUG: bool = config("DEBUG", cast=bool, default=False)
 PROJECT_NAME: str = config("PROJECT_NAME", default="Ensembl Refget Proxy")

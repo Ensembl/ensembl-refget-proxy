@@ -16,7 +16,6 @@
 
 import asyncio
 import json
-import pickle
 
 import aioredis
 from loguru import logger
@@ -84,7 +83,7 @@ async def get_cached_metadata(metadata_checksum):
 
 async def cache_url(url):
     """
-    store url in redis using checksum as key.
+    Store url in redis using checksum as key.
     """
     try:
         async with RedisConnection() as redis:
@@ -92,15 +91,13 @@ async def cache_url(url):
                 redis.set(url["checksum"], url["refget_server_url"])
             )
 
-        return True
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
-        return False
 
 
 async def cache_metadata(url, metadata):
     """
-    store metadata in redis using checksum/metadata as key.
+    Store metadata in redis using checksum/metadata as key.
     """
     try:
         async with RedisConnection() as redis:
@@ -108,7 +105,5 @@ async def cache_metadata(url, metadata):
                 redis.set(url["checksum"] + "/metadata", json.dumps(metadata))
             )
 
-        return True
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
-        return False

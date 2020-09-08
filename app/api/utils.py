@@ -58,6 +58,7 @@ async def find_result_url(session, url):
     try:
         async with session.get(url["metadata_url"]) as response:
             if response.status == 200:
+
                 await cache_url(url=url)
                 url_result = url
 
@@ -101,7 +102,6 @@ async def create_request_coroutine(checksum, url_path, headers, params):
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
-        return e
 
 
 async def get_result(url_detail, session, url_path, headers, params):
@@ -123,7 +123,7 @@ async def get_result(url_detail, session, url_path, headers, params):
                         response_dict["response"] = await response.text()
                     else:
                         response_dict["response"] = await response.json()
-                        await cache_metadata(url_detail, dict(await response.json()))
+                        await cache_metadata(url_detail, response_dict["response"])
 
                     return response_dict
                 else:

@@ -16,8 +16,11 @@
 
 version: '2'
 services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
   refget_proxy:
-
     build: 
       context: .
       dockerfile: Dockerfile
@@ -27,7 +30,12 @@ services:
       - PORT=${PORT}
       - REFGET_SERVER_URL_LIST=${REFGET_SERVER_URL_LIST}
       - DEBUG=${DEBUG}
+      - REDIS_TYPE=${REDIS_TYPE}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     container_name: refget_proxy_api
+    volumes:
+      - ./app/:/app/
     ports:
       - ${PORT}:${PORT}
 
