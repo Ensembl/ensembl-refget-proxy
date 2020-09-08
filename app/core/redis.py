@@ -15,6 +15,7 @@
 #
 
 import asyncio
+import json
 import pickle
 
 import aioredis
@@ -75,7 +76,7 @@ async def get_cached_metadata(metadata_checksum):
         async with RedisConnection() as redis:
             result = await asyncio.ensure_future(redis.get(metadata_checksum))
             if result:
-                return dict(pickle.loads(result, encoding="utf-8"))
+                return json.loads(result, encoding="utf-8")
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
@@ -104,7 +105,7 @@ async def cache_metadata(url, metadata):
     try:
         async with RedisConnection() as redis:
             await asyncio.ensure_future(
-                redis.set(url["checksum"] + "/metadata", pickle.dumps(metadata))
+                redis.set(url["checksum"] + "/metadata", json.dumps(metadata))
             )
 
         return True
