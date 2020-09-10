@@ -56,9 +56,8 @@ async def find_result_url(session, url):
     """
 
     try:
-        async with session.get(url["metadata_url"]) as response:
+        async with session.get(url["metadata_url"], ssl=False) as response:
             if response.status == 200:
-
                 await cache_url(url=url)
                 url_result = url
 
@@ -115,6 +114,7 @@ async def get_result(url_detail, session, url_path, headers, params):
                 url=url_detail["refget_server_url"] + url_path,
                 params=params,
                 headers=headers,
+                ssl=False,
             ) as response:
                 if response.status == 200:
                     response_dict["headers"] = response.headers
