@@ -38,7 +38,7 @@ class RedisConnection(object):
         """
         self.redis_connection_info = REDIS_HOST + ":" + REDIS_PORT
         self.redis_connection = aioredis.create_redis_pool(
-            "redis://" + self.redis_connection_info
+            "redis://" + self.redis_connection_info, timeout=10
         )
 
     async def __aenter__(self):
