@@ -71,16 +71,16 @@ async def find_result_url(session, url_detail):
     return url_result
 
 
-# async def on_request_start(
-#         session, trace_config_ctx, params):
-#     logger.log('DEBUG', "Starting request")
-#     logger.log('DEBUG', trace_config_ctx)
-#     logger.log('DEBUG', params)
-#
-#
-# async def on_request_end(session, trace_config_ctx, params):
-#     logger.log('DEBUG', trace_config_ctx)
-#     logger.log('DEBUG', "Ending request")
+async def on_request_start(
+        session, trace_config_ctx, params):
+    logger.log('DEBUG', "Starting request")
+    logger.log('DEBUG', trace_config_ctx)
+    logger.log('DEBUG', params)
+
+
+async def on_request_end(session, trace_config_ctx, params):
+    logger.log('DEBUG', trace_config_ctx)
+    logger.log('DEBUG', "Ending request")
 
 
 async def create_request_coroutine(checksum, url_path, headers, params):
@@ -89,13 +89,13 @@ async def create_request_coroutine(checksum, url_path, headers, params):
     url_list [(tuple)]: Metadata URL list
     """
     try:
-        # trace_config = aiohttp.TraceConfig()
-        # trace_config.on_request_start.append(on_request_start)
-        # trace_config.on_request_end.append(on_request_end)
+        trace_config = aiohttp.TraceConfig()
+        trace_config.on_request_start.append(on_request_start)
+        trace_config.on_request_end.append(on_request_end)
 
         url_detail = await get_cached_url(checksum)
         async with aiohttp.ClientSession(
-                raise_for_status=True, read_timeout=None, trust_env=True
+                raise_for_status=True, read_timeout=None, trust_env=True, trace_configs=[trace_config]
         ) as session:
             if url_detail is None:
                 url_list = metadata_url_list(checksum)
