@@ -48,7 +48,7 @@ def metadata_url_list(checksum):
     return url_list
 
 
-async def find_result_url(session, url):
+async def find_result_url(session, url_detail):
     """
     Send a request to metadata URL to check status. status: 200 will return url otherwise it will cancel to coroutine job and return "".
     session: aiohttp session
@@ -56,10 +56,12 @@ async def find_result_url(session, url):
     """
 
     try:
-        async with session.get(url["metadata_url"], ssl=False) as response:
+        # async with session.trace(url_detail["metadata_url"]) as trace:
+        #     logger.log('DEBUG', trace)
+        async with session.get(url_detail["metadata_url"]) as response:
             if response.status == 200:
-                await cache_url(url=url)
-                url_result = url
+                await cache_url(url_detail=url_detail)
+                url_result = url_detail
 
     except (ClientResponseError, ClientConnectorError) as e:
         asyncio.current_task().remove_done_callback(asyncio.current_task)
@@ -69,22 +71,38 @@ async def find_result_url(session, url):
     return url_result
 
 
+async def on_request_start(
+        session, trace_config_ctx, params):
+    logger.log('DEBUG', "Starting request")
+    logger.log('DEBUG', trace_config_ctx)
+    logger.log('DEBUG', params)
+
+
+async def on_request_end(session, trace_config_ctx, params):
+    logger.log('DEBUG', trace_config_ctx)
+    logger.log('DEBUG', "Ending request")
+
+
 async def create_request_coroutine(checksum, url_path, headers, params):
     """
     Create coroutine requests with asyncio to return Refget result based on metadata result.
     url_list [(tuple)]: Metadata URL list
     """
     try:
+        trace_config = aiohttp.TraceConfig()
+        trace_config.on_request_start.append(on_request_start)
+        trace_config.on_request_end.append(on_request_end)
+
         url_detail = await get_cached_url(checksum)
         async with aiohttp.ClientSession(
-            raise_for_status=True, read_timeout=None, trust_env=True
+                raise_for_status=True, read_timeout=None, trust_env=True, trace_configs=[trace_config]
         ) as session:
             if url_detail is None:
                 url_list = metadata_url_list(checksum)
 
                 coroutines = [
-                    asyncio.ensure_future(find_result_url(session=session, url=url))
-                    for url in url_list
+                    asyncio.ensure_future(find_result_url(session=session, url_detail=url_detail))
+                    for url_detail in url_list
                 ]
                 done, pending = await asyncio.wait(coroutines)
                 for task in done:
@@ -111,10 +129,10 @@ async def get_result(url_detail, session, url_path, headers, params):
     if url_detail:
         try:
             async with session.get(
-                url=url_detail["refget_server_url"] + url_path,
-                params=params,
-                headers=headers,
-                ssl=False,
+                    url=url_detail["refget_server_url"] + url_path,
+                    params=params,
+                    headers=headers,
+                    ssl=False,
             ) as response:
                 if response.status == 200:
                     response_dict["headers"] = response.headers
@@ -123,7 +141,7 @@ async def get_result(url_detail, session, url_path, headers, params):
                         response_dict["response"] = await response.text()
                     else:
                         response_dict["response"] = await response.json()
-                        await cache_metadata(url_detail, response_dict["response"])
+                        await cache_metadata(url_detail=url_detail, metadata=response_dict["response"])
 
                     return response_dict
                 else:
