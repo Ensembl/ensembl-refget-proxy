@@ -49,6 +49,21 @@ class RedisConnection(object):
         self.redis_connection.close()
 
 
+async def cache_url(url_detail):
+    """
+    Store url in redis using checksum as key.
+    """
+    try:
+        async with RedisConnection() as redis:
+            await asyncio.ensure_future(
+                redis.set(url_detail["checksum"], url_detail["refget_server_url"])
+            )
+        return True
+    except Exception as e:
+        logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
+        return False
+
+
 async def get_cached_url(checksum):
     """
     Get cached url from redis.
@@ -67,43 +82,30 @@ async def get_cached_url(checksum):
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
 
 
-async def get_cached_metadata(metadata_checksum):
-    """
-    Get cached metadata from redis.
-    """
-    try:
-        async with RedisConnection() as redis:
-            result = await asyncio.ensure_future(redis.get(metadata_checksum))
-            if result:
-                return json.loads(result, encoding="utf-8")
-
-    except Exception as e:
-        logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
-
-
-async def cache_url(url):
-    """
-    Store url in redis using checksum as key.
-    """
-    try:
-        async with RedisConnection() as redis:
-            await asyncio.ensure_future(
-                redis.set(url["checksum"], url["refget_server_url"])
-            )
-
-    except Exception as e:
-        logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
-
-
-async def cache_metadata(url, metadata):
+async def cache_metadata(url_detail, metadata):
     """
     Store metadata in redis using checksum/metadata as key.
     """
     try:
         async with RedisConnection() as redis:
             await asyncio.ensure_future(
-                redis.set(url["checksum"] + "/metadata", json.dumps(metadata))
+                redis.set(url_detail["checksum"] + "/metadata", json.dumps(metadata))
             )
+        return True
+    except Exception as e:
+        logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
+        return False
+
+
+async def get_cached_metadata(checksum):
+    """
+    Get cached metadata from redis.
+    """
+    try:
+        async with RedisConnection() as redis:
+            result = await asyncio.ensure_future(redis.get(checksum + "/metadata"))
+            if result:
+                return json.loads(result, encoding="utf-8")
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))

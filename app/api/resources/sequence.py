@@ -13,6 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
+
 import json
 import logging
 
@@ -52,15 +53,19 @@ async def get_sequence(request: Request, checksum: str):
         logger.log("DEBUG", e)
 
 
-@router.get("/{checksum}/metadata", name="sequence:metadata")
+@router.get(
+    "/{checksum}/metadata",
+    name="sequence:metadata",
+    response_class=responses.JSONResponse,
+)
 async def get_sequence_metadata(request: Request, checksum: str):
     """
     Return Refget sequence metadata based on a sequence checksum.
     """
 
     url_path = "sequence/" + checksum + "/metadata"
-    result = await get_cached_metadata(checksum + "/metadata")
 
+    result = await get_cached_metadata(checksum)
     if result:
         headers = {"accept": "application/json"}
         return responses.Response(json.dumps(result), headers=headers, status_code=200)
