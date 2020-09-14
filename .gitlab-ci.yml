@@ -19,7 +19,7 @@ variables:
     CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
 
 stages:
-#  - test
+  - test
   - build_docker_image
   - deploy
   - compliance
@@ -68,20 +68,20 @@ stages:
     DOCKERFILE: Dockerfile.prod
 
 # Run Tests
-#Test:
-#  stage: test
-#
-#  image: python:3.8
-#
-#  variables:
-#    REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
-#  script:
-#    - pip install poetry==1.0.*
-#    - poetry config virtualenvs.create false
-#    - poetry install --no-dev
-#    - cp -R ./app/ /app/
-#    - cd /app
-#    - python -m unittest
+Test:
+  stage: test
+
+  image: python:3.8
+
+  variables:
+    REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
+  script:
+    - pip install poetry==1.0.*
+    - poetry config virtualenvs.create false
+    - poetry install --no-dev
+    - cp -R ./app/ /app/
+    - cd /app
+    - python -m unittest
 
 # Run Compliance Test on refget url
 Compliance-Test:
