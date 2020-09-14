@@ -36,7 +36,7 @@ REDIS_HOST: str = environ.get("REDIS_HOST")
 REDIS_PORT: str = environ.get("REDIS_PORT")
 
 config = Config(".env")
-DEBUG: bool = config("DEBUG", cast=bool, default=False)
+DEBUG: bool = config("DEBUG", cast=bool, default=True)
 PROJECT_NAME: str = config("PROJECT_NAME", default="Ensembl Refget Proxy")
 ALLOWED_HOSTS: List[str] = config(
     "ALLOWED_HOSTS", cast=CommaSeparatedStrings, default="*",
