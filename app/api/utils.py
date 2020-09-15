@@ -73,10 +73,11 @@ async def find_result_url(session, url_detail):
 
 async def on_request_start(
         session, trace_config_ctx, params):
+    logger.log('DEBUG', "Starting request")
+    logger.log('DEBUG', params)
     test = params.headers.get('host')
     if test:
-        logger.log('DEBUG', "Starting request")
-        logger.log('DEBUG', params)
+
         logger.log('DEBUG', trace_config_ctx)
         logger.log('DEBUG', dir(params.headers))
         logger.log('DEBUG', params.headers)
