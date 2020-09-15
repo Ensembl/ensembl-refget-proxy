@@ -80,6 +80,7 @@ async def on_request_start(
 
 async def on_request_end(session, trace_config_ctx, params):
     logger.log('DEBUG', trace_config_ctx)
+    logger.log('DEBUG', params)
     logger.log('DEBUG', "Ending request")
 
 

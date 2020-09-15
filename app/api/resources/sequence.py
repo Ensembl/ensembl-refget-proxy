@@ -37,7 +37,9 @@ async def get_sequence(request: Request, checksum: str):
     Return Refget sequence based on a sequence checksum.
     """
     params = request.query_params
-    headers = {header: request.headers.get(header) for header in request.headers}
+    # headers = {header: request.headers.get(header) for header in request.headers}
+    headers = {"accept": "application/json"}
+
     url_path = "sequence/" + checksum
 
     try:
@@ -66,13 +68,13 @@ async def get_sequence_metadata(request: Request, checksum: str):
     url_path = "sequence/" + checksum + "/metadata"
 
     result = await get_cached_metadata(checksum)
+    headers = {"accept": "application/json"}
     if result:
-        headers = {"accept": "application/json"}
         return responses.Response(json.dumps(result), headers=headers, status_code=200)
 
     try:
         params = request.query_params
-        headers = {header: request.headers.get(header) for header in request.headers}
+        # headers = {header: request.headers.get(header) for header in request.headers}
 
         result = await create_request_coroutine(
             checksum=checksum, url_path=url_path, headers=headers, params=params,
