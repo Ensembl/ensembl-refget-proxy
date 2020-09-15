@@ -66,8 +66,8 @@ async def get_sequence_metadata(request: Request, checksum: str):
     url_path = "sequence/" + checksum + "/metadata"
 
     result = await get_cached_metadata(checksum)
-    headers = {"accept": "application/json"}
     if result:
+        headers = {"accept": "application/json"}
         return responses.Response(json.dumps(result), headers=headers, status_code=200)
 
     try:
