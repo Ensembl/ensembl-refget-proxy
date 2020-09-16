@@ -77,7 +77,10 @@ async def on_request_start(
     logger.log('DEBUG', params)
     logger.log('DEBUG', params.headers)
     logger.log('DEBUG', "----------")
-    params.headers = {'accept': '*/*', 'host': params.headers.get('host')}
+    for i in params.headers:
+        if 'x' in i:
+            params.headers.pop(i)
+    # params.headers = {'accept': '*/*', 'host': params.headers.get('host')}
 
 
 async def on_request_end(session, trace_config_ctx, params):
