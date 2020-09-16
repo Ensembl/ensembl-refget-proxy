@@ -76,14 +76,7 @@ async def on_request_start(
     logger.log('DEBUG', "Starting request")
     logger.log('DEBUG', params)
     logger.log('DEBUG', "----------")
-    try:
-        for i in params.headers:
-            if i.start('x') != -1:
-                params.headers.pop(i)
-    except:
-        pass
     logger.log('DEBUG', params.headers)
-    # params.headers = {'accept': '*/*', 'host': params.headers.get('host')}
 
 
 async def on_request_end(session, trace_config_ctx, params):
@@ -140,6 +133,7 @@ async def get_result(url_detail, session, url_path, headers, params):
         try:
             async with session.get(
                     url=url_detail["refget_server_url"] + url_path,
+                    params=params,
                     ssl=False,
             ) as response:
                 if response.status == 200:
