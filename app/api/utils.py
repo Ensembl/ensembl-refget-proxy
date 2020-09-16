@@ -75,9 +75,11 @@ async def on_request_start(
         session, trace_config_ctx, params):
     logger.log('DEBUG', "Starting request")
     logger.log('DEBUG', session)
+    logger.log('DEBUG', dir(session))
     logger.log('DEBUG', params)
     logger.log('DEBUG', dir(params.headers))
     logger.log('DEBUG', params.headers)
+    logger.log('DEBUG', "----------")
     # params.headers = {}
     # if test:
     #
@@ -93,6 +95,7 @@ async def on_request_start(
 
 async def on_request_end(session, trace_config_ctx, params):
     logger.log('DEBUG', session)
+    logger.log('DEBUG', dir(session))
     logger.log('DEBUG', trace_config_ctx)
     logger.log('DEBUG', params)
     logger.log('DEBUG', "Ending request")
