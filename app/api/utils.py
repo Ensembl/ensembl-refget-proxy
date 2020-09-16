@@ -75,11 +75,14 @@ async def on_request_start(
         session, trace_config_ctx, params):
     logger.log('DEBUG', "Starting request")
     logger.log('DEBUG', params)
-    logger.log('DEBUG', params.headers)
     logger.log('DEBUG', "----------")
-    for i in params.headers:
-        if 'x' in i:
-            params.headers.pop(i)
+    try:
+        for i in params.headers:
+            if 'x' in i:
+                params.headers.pop(i)
+    except:
+        pass
+    logger.log('DEBUG', params.headers)
     # params.headers = {'accept': '*/*', 'host': params.headers.get('host')}
 
 
