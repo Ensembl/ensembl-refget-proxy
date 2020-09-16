@@ -140,8 +140,6 @@ async def get_result(url_detail, session, url_path, headers, params):
         try:
             async with session.get(
                     url=url_detail["refget_server_url"] + url_path,
-                    params=params,
-                    headers=headers,
                     ssl=False,
             ) as response:
                 if response.status == 200:
