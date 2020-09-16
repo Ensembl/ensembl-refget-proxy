@@ -78,7 +78,7 @@ async def on_request_start(
     logger.log('DEBUG', "----------")
     try:
         for i in params.headers:
-            if 'x' in i:
+            if i.start('x') != -1:
                 params.headers.pop(i)
     except:
         pass
@@ -88,8 +88,6 @@ async def on_request_start(
 
 async def on_request_end(session, trace_config_ctx, params):
     logger.log('DEBUG', session)
-    logger.log('DEBUG', dir(session))
-    logger.log('DEBUG', trace_config_ctx)
     logger.log('DEBUG', params)
     logger.log('DEBUG', "Ending request")
 
