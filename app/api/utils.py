@@ -131,6 +131,9 @@ async def get_result(url_detail, session, url_path, headers, params):
 
     if url_detail:
         try:
+            logger.log('DEBUG', "=====headers====")
+            logger.log('DEBUG', headers)
+            logger.log('DEBUG', "-----headers----")
             async with session.get(
                     url=url_detail["refget_server_url"] + url_path,
                     params=params,
