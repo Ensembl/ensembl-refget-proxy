@@ -131,21 +131,6 @@ async def get_result(url_detail, session, url_path, headers, params):
 
     if url_detail:
         try:
-            logger.log('DEBUG', "=====headers====")
-            headers = {
-                       'x-request-id': '76855df8611ed57fe9a32a95e0de4c80',
-                       'x-real-ip': '10.251.13.64',
-                       'x-forwarded-for': '10.251.13.64',
-                       'x-forwarded-host': 'feature-redis.dev.refget.review.ensembl.org',
-                       'x-forwarded-port': '80',
-                       'x-forwarded-proto': 'http',
-                       'x-scheme': 'http',
-                       'user-agent': 'curl/7.29.0',
-                       'accept': '*/*',
-                       'x-cluster-client-ip': '10.7.135.165'}
-
-            logger.log('DEBUG', headers)
-            logger.log('DEBUG', "-----headers----")
             async with session.get(
                     url=url_detail["refget_server_url"] + url_path,
                     params=params,
