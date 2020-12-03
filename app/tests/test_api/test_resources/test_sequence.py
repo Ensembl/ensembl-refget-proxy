@@ -29,7 +29,7 @@ class APISequenceTestCase(unittest.TestCase):
         self.sequence_url_prefix = "api/sequence/"
         self.metadata_url_prefix = "/metadata/"
         self.checksum = "6681ac2f62509cfc220d78751b8dc524"
-        self.refget_url = "http://hx-rke-wp-webadmin-14-worker-1.caas.ebi.ac.uk:31136/"
+        self.refget_url = "http://test.service.refget.review.ensembl.org/"
         self.sequence_path = self.sequence_url_prefix + self.checksum
         self.sequence_not_found_path = self.sequence_url_prefix + "6681ac2f62751b8dc845"
 
