@@ -41,7 +41,7 @@ stages:
 
 .deploy-wp:
   stage: deploy
-  image: dockerhub.ebi.ac.uk/kamal/deploy-tools:0.1
+  image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:0.1
 
   script:
   - git clone https://gitlab.ebi.ac.uk/kamal/ensembl-client-caas-deploy.git
@@ -122,4 +122,14 @@ Feature:wp-feature:
   only:
   - /^feature\/.*$/
   when: manual
+
+
+# Deploy live to WP-HH cluster
+Live:WP-HH:
+  extends: .deploy-wp
+  environment:
+    name : wp-hh-live
+
+  only:
+  - master
 

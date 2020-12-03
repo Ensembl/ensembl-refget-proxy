@@ -56,8 +56,6 @@ async def find_result_url(session, url_detail):
     """
 
     try:
-        # async with session.trace(url_detail["metadata_url"]) as trace:
-        #     logger.log('DEBUG', trace)
         async with session.get(url_detail["metadata_url"]) as response:
             if response.status == 200:
                 await cache_url(url_detail=url_detail)
@@ -71,33 +69,16 @@ async def find_result_url(session, url_detail):
     return url_result
 
 
-async def on_request_start(
-        session, trace_config_ctx, params):
-    logger.log('DEBUG', "Starting request")
-    logger.log('DEBUG', params)
-    logger.log('DEBUG', "----------")
-    logger.log('DEBUG', params.headers)
-
-
-async def on_request_end(session, trace_config_ctx, params):
-    logger.log('DEBUG', session)
-    logger.log('DEBUG', params)
-    logger.log('DEBUG', "Ending request")
-
-
 async def create_request_coroutine(checksum, url_path, headers, params):
     """
     Create coroutine requests with asyncio to return Refget result based on metadata result.
     url_list [(tuple)]: Metadata URL list
     """
     try:
-        trace_config = aiohttp.TraceConfig()
-        trace_config.on_request_start.append(on_request_start)
-        trace_config.on_request_end.append(on_request_end)
 
         url_detail = await get_cached_url(checksum)
         async with aiohttp.ClientSession(
-                raise_for_status=True, read_timeout=None, trust_env=True, trace_configs=[trace_config]
+                raise_for_status=True, read_timeout=None, trust_env=True
         ) as session:
             if url_detail is None:
                 url_list = metadata_url_list(checksum)
