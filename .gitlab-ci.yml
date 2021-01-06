@@ -48,13 +48,14 @@ stages:
   - git -C ensembl-client-caas-deploy/ checkout ensembl_refget_proxy_caas_deploy
   - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
   - sed -i "s#<DOCKER_IMAGE>#${CONTAINER_IMAGE}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
+  sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
   - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
 
 # Template to deploy to WP k8s cluster
 
 .deploy-wp-feature:
   stage: deploy
-  image: dockerhub.ebi.ac.uk/kamal/deploy-tools:0.1
+  image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:0.1
 
   script:
   - git clone https://gitlab.ebi.ac.uk/kamal/ensembl-client-caas-deploy.git
@@ -102,6 +103,25 @@ Staging:WP-HX:
 
   only:
   - dev
+  when: manual
+
+# Deploy dev to WP-HX cluster
+Docker-IMG:Dev:
+  extends: .build
+  variables:
+    DOCKERFILE: Dockerfile
+
+  only:
+  - dev
+
+Dev:WP-HX:
+  extends: .deploy-wp
+  environment:
+    name : wp-hx-dev-grp
+
+  only:
+  - dev
+
 
 Docker-IMG:feature:
   extends: .build
