@@ -73,7 +73,7 @@ stages:
 Test:
   stage: test
 
-  image: python:3.8-alpine
+  image: python:3.8-alpine3.12
 
   variables:
     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
@@ -88,7 +88,7 @@ Test:
 # Run Compliance Test on refget url
 Compliance-Test:
   stage: compliance
-  image: python:3.8-alpine
+  image: python:3.8-alpine3.12
   script:
     - pip install refget-compliance
     - refget-compliance report -s http://${CI_COMMIT_REF_SLUG}.dev.refget.review.ensembl.org/api/ --json server.json
