@@ -16,6 +16,7 @@
 
 import asyncio
 import logging
+import re
 
 import aiohttp
 from aiohttp import ClientResponseError, ClientConnectorError
@@ -28,6 +29,18 @@ from core.redis import cache_metadata, cache_url, get_cached_url
 logging.getLogger().handlers = [InterceptHandler()]
 
 
+def is_url_valid(url):
+    regex = re.compile(
+        r'^(?:http|ftp)s?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    return re.match(regex, url) is not None
+
+
+
 def metadata_url_list(checksum):
     """
     Create and return a list of dictionary containing:
@@ -36,15 +49,21 @@ def metadata_url_list(checksum):
 
     url_list = []
     for url in REFGET_SERVER_URL_LIST:
-        if not url.endswith("/"):
-            url = url + "/"
-        url_list.append(
-            {
-                "refget_server_url": url,
-                "checksum": checksum,
-                "metadata_url": url + "sequence/" + checksum + "/metadata",
-            }
-        )
+        url = url.strip()
+        if is_url_valid(url):
+            if not url.endswith("/"):
+                url = url + "/"
+            url_list.append(
+                {
+                    "refget_server_url": url,
+                    "checksum": checksum,
+                    "metadata_url": url + "sequence/" + checksum + "/metadata",
+                }
+            )
+
+        else:
+            raise ValueError('Invalid URL', 'Please define valid refget urls.')
+
     return url_list
 
 
