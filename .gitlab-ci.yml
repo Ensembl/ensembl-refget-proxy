@@ -73,7 +73,7 @@ stages:
 Test:
   stage: test
 
-  image: python:3.8
+  image: python:3.8-alpine
 
   variables:
     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
