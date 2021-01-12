@@ -77,12 +77,11 @@ async def get_sequence_metadata(request: Request, checksum: str):
         result = await create_request_coroutine(
             checksum=checksum, url_path=url_path, headers=headers, params=params,
         )
-
         if result["status"] != 200:
             return response_error_handler(result)
         else:
             return responses.Response(
-                json.dumps(result["response"]), headers=result["headers"]
+                json.dumps(result["response"]), headers={"accept": "application/json"}, status_code=result["status"]
             )
 
     except (ClientResponseError, Exception) as e:
