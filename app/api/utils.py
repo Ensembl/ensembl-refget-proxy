@@ -50,19 +50,19 @@ def metadata_url_list(checksum):
     url_list = []
     for url in REFGET_SERVER_URL_LIST:
         url = url.strip()
-        if is_url_valid(url):
-            if not url.endswith("/"):
-                url = url + "/"
-            url_list.append(
-                {
-                    "refget_server_url": url,
-                    "checksum": checksum,
-                    "metadata_url": url + "sequence/" + checksum + "/metadata",
-                }
-            )
+        # if is_url_valid(url):
+        if not url.endswith("/"):
+            url = url + "/"
+        url_list.append(
+            {
+                "refget_server_url": url,
+                "checksum": checksum,
+                "metadata_url": url + "sequence/" + checksum + "/metadata",
+            }
+        )
 
-        else:
-            raise ValueError('Invalid URL', 'Please define valid refget urls.')
+        # else:
+        #     raise ValueError('Invalid URL', 'Please define valid refget urls.')
 
     return url_list
 
