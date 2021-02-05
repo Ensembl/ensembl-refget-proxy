@@ -78,7 +78,7 @@ async def find_result_url(session, url_detail):
 
         if url_detail["refget_server_url"] == 'https://www.ebi.ac.uk/ena/cram/':
 
-            async with session.get(url_detail["metadata_url"], proxy='http://hx-wwwcache.ebi.ac.uk:3128') as response:
+            async with session.get(url_detail["metadata_url"], proxy='https://hx-wwwcache.ebi.ac.uk:3128') as response:
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
                     url_result = url_detail
@@ -140,24 +140,44 @@ async def get_result(url_detail, session, url_path, headers, params):
 
     if url_detail:
         try:
-            async with session.get(
-                    url=url_detail["refget_server_url"] + url_path,
-                    params=params,
-                    ssl=False,
-                    headers=headers
-            ) as response:
-                if response.status == 200:
-                    response_dict["headers"] = response.headers
-                    response_dict["status"] = response.status
-                    if response.headers.get("content-type").find("text") != -1:
-                        response_dict["response"] = await response.text()
-                    else:
-                        response_dict["response"] = await response.json()
-                        await cache_metadata(url_detail=url_detail, metadata=response_dict["response"])
+            if url_detail["refget_server_url"] == 'https://www.ebi.ac.uk/ena/cram/':
 
-                    return response_dict
-                else:
-                    response_dict["status"] = response.status
+                async with session.get(
+                        url=url_detail["refget_server_url"] + url_path,
+                        params=params,
+                        ssl=False,
+                        headers=headers, proxy='https://hx-wwwcache.ebi.ac.uk:3128'
+                ) as response:
+                    if response.status == 200:
+                        response_dict["headers"] = response.headers
+                        response_dict["status"] = response.status
+                        if response.headers.get("content-type").find("text") != -1:
+                            response_dict["response"] = await response.text()
+                        else:
+                            response_dict["response"] = await response.json()
+                            await cache_metadata(url_detail=url_detail, metadata=response_dict["response"])
+
+                        return response_dict
+                    else:
+                        response_dict["status"] = response.status
+            else:
+                async with session.get(
+                        url=url_detail["refget_server_url"] + url_path,
+                        params=params,
+                        ssl=False,
+                ) as response:
+                    if response.status == 200:
+                        response_dict["headers"] = response.headers
+                        response_dict["status"] = response.status
+                        if response.headers.get("content-type").find("text") != -1:
+                            response_dict["response"] = await response.text()
+                        else:
+                            response_dict["response"] = await response.json()
+                            await cache_metadata(url_detail=url_detail, metadata=response_dict["response"])
+
+                        return response_dict
+                    else:
+                        response_dict["status"] = response.status
         except ClientResponseError as client_error:
             response_dict["status"] = client_error.status
 
