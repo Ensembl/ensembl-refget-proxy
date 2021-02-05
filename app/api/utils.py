@@ -146,7 +146,7 @@ async def get_result(url_detail, session, url_path, headers, params):
                         url=url_detail["refget_server_url"] + url_path,
                         params=params,
                         ssl=False,
-                        headers=headers, proxy='https://hx-wwwcache.ebi.ac.uk:3128'
+                        headers=headers
                 ) as response:
                     if response.status == 200:
                         response_dict["headers"] = response.headers
