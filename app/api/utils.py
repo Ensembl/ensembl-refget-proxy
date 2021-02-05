@@ -77,6 +77,7 @@ async def find_result_url(session, url_detail):
     try:
 
         if url_detail["refget_server_url"] == 'https://www.ebi.ac.uk/ena/cram/':
+
             async with session.get(url_detail["metadata_url"], proxy='http://hx-wwwcache.ebi.ac.uk:3128') as response:
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
@@ -105,7 +106,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
 
         url_detail = await get_cached_url(checksum)
         async with aiohttp.ClientSession(
-                raise_for_status=True, read_timeout=None, trust_env=True
+                raise_for_status=True, read_timeout=None
         ) as session:
             if url_detail is None:
                 url_list = metadata_url_list(checksum)
