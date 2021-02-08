@@ -88,7 +88,8 @@ class APISequenceTestCase(unittest.TestCase):
 
     def test_metadata_url_list(self):
         from loguru import logger
-        logger.log('DEBUG', metadata_url_list(self.checksum) )
+
+        logger.log("DEBUG", metadata_url_list(self.checksum))
         assert metadata_url_list(self.checksum) == [
             {
                 "refget_server_url": self.refget_url,
