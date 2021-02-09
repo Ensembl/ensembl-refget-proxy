@@ -22,7 +22,7 @@ import aiohttp
 from aiohttp import ClientResponseError, ClientConnectorError
 from loguru import logger
 
-from core.config import REFGET_SERVER_URL_LIST
+from core.config import REFGET_SERVER_URL_LIST, HTTP_PROXY
 from core.logging import InterceptHandler
 from core.redis import cache_metadata, cache_url, get_cached_url
 
@@ -31,26 +31,27 @@ logging.getLogger().handlers = [InterceptHandler()]
 
 def is_url_valid(url):
     regex = re.compile(
-        r'^(?:http|ftp)s?://'  # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-        r'refget-perl-server-dev-svc|'  # Custom refget service...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-        r'(?::\d+)?'  # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+        r"^(?:http|ftp)s?://"  # http:// or https://
+        r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
+        r"refget-perl-server-dev-svc|"  # Custom refget service...
+        r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+        r"(?::\d+)?"  # optional port
+        r"(?:/?|[/?]\S+)$",
+        re.IGNORECASE,
+    )
     return re.match(regex, url) is not None
-
 
 
 def metadata_url_list(checksum):
     """
     Create and return a list of dictionary containing:
-    [{"refget_server_url": "Refget server URL", "checksum": "checksum", "metadata_url": "Generated metadata URL")]
+    [{"refget_server_url": "Refget server URL", "checksum": "checksum", "metadata_url": "Generated metadata URL"), is_url:Boolean]
+    is_url: To define a proxy rule in our k8s structure and route the internal services directly to the related service.
     """
 
     url_list = []
     for url in REFGET_SERVER_URL_LIST:
         url = url.strip()
-        # if is_url_valid(url):
         if not url.endswith("/"):
             url = url + "/"
         url_list.append(
@@ -58,11 +59,9 @@ def metadata_url_list(checksum):
                 "refget_server_url": url,
                 "checksum": checksum,
                 "metadata_url": url + "sequence/" + checksum + "/metadata",
+                "is_url": is_url_valid(url),
             }
         )
-
-        # else:
-        #     raise ValueError('Invalid URL', 'Please define valid refget urls.')
 
     return url_list
 
@@ -76,9 +75,11 @@ async def find_result_url(session, url_detail):
 
     try:
 
-        if url_detail["refget_server_url"] == 'https://www.ebi.ac.uk/ena/cram/':
+        if url_detail["is_url"]:
 
-            async with session.get(url_detail["metadata_url"], proxy='http://hx-wwwcache.ebi.ac.uk:3128') as response:
+            async with session.get(
+                url_detail["metadata_url"], proxy=HTTP_PROXY
+            ) as response:
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
                     url_result = url_detail
@@ -87,7 +88,6 @@ async def find_result_url(session, url_detail):
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
                     url_result = url_detail
-
 
     except (ClientResponseError, ClientConnectorError) as e:
         asyncio.current_task().remove_done_callback(asyncio.current_task)
@@ -106,30 +106,76 @@ async def create_request_coroutine(checksum, url_path, headers, params):
 
         url_detail = await get_cached_url(checksum)
         async with aiohttp.ClientSession(
-                raise_for_status=True, read_timeout=None
+            raise_for_status=True, read_timeout=None
         ) as session:
             if url_detail is None:
                 url_list = metadata_url_list(checksum)
 
                 coroutines = [
-                    asyncio.ensure_future(find_result_url(session=session, url_detail=url_detail))
+                    asyncio.ensure_future(
+                        find_result_url(session=session, url_detail=url_detail)
+                    )
                     for url_detail in url_list
                 ]
                 done, pending = await asyncio.wait(coroutines)
                 for task in done:
                     if not task.cancelled():
                         url_detail = task.result()
-
-            return await get_result(
-                url_detail=url_detail,
-                session=session,
-                url_path=url_path,
-                headers=headers,
-                params=params,
-            )
+            if url_detail["is_url"]:
+                return await get_result(
+                    url_detail=url_detail,
+                    session=session,
+                    url_path=url_path,
+                    headers=headers,
+                    params=params,
+                )
+            else:
+                return await get_result_proxy(
+                    url_detail=url_detail,
+                    session=session,
+                    url_path=url_path,
+                    headers=headers,
+                    params=params,
+                )
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
+
+
+async def get_result_proxy(url_detail, session, url_path, headers, params):
+    """
+    Create coroutine requests with asyncio to return Refget result based on metadata result using a proxy service.
+    """
+    response_dict = {"response": "", "headers": {}, "status": 404}
+
+    if url_detail:
+        try:
+            async with session.get(
+                url=url_detail["refget_server_url"] + url_path,
+                params=params,
+                ssl=False,
+                headers=headers,
+                proxy=HTTP_PROXY,
+            ) as response:
+                if response.status == 200:
+                    response_dict["headers"] = response.headers
+                    response_dict["status"] = response.status
+                    if response.headers.get("content-type").find("text") != -1:
+                        response_dict["response"] = await response.text()
+                    else:
+                        response_dict["response"] = await response.json()
+                        await cache_metadata(
+                            url_detail=url_detail, metadata=response_dict["response"]
+                        )
+
+                    return response_dict
+                else:
+                    response_dict["status"] = response.status
+
+        except ClientResponseError as client_error:
+            response_dict["status"] = client_error.status
+
+    return response_dict
 
 
 async def get_result(url_detail, session, url_path, headers, params):
@@ -140,44 +186,26 @@ async def get_result(url_detail, session, url_path, headers, params):
 
     if url_detail:
         try:
-            if url_detail["refget_server_url"] == 'https://www.ebi.ac.uk/ena/cram/':
-
-                async with session.get(
-                        url=url_detail["refget_server_url"] + url_path,
-                        params=params,
-                        ssl=False,
-                        headers=headers, proxy='http://hx-wwwcache.ebi.ac.uk:3128'
-                ) as response:
-                    if response.status == 200:
-                        response_dict["headers"] = response.headers
-                        response_dict["status"] = response.status
-                        if response.headers.get("content-type").find("text") != -1:
-                            response_dict["response"] = await response.text()
-                        else:
-                            response_dict["response"] = await response.json()
-                            await cache_metadata(url_detail=url_detail, metadata=response_dict["response"])
-
-                        return response_dict
+            async with session.get(
+                url=url_detail["refget_server_url"] + url_path,
+                params=params,
+                ssl=False,
+                headers=headers,
+            ) as response:
+                if response.status == 200:
+                    response_dict["headers"] = response.headers
+                    response_dict["status"] = response.status
+                    if response.headers.get("content-type").find("text") != -1:
+                        response_dict["response"] = await response.text()
                     else:
-                        response_dict["status"] = response.status
-            else:
-                async with session.get(
-                        url=url_detail["refget_server_url"] + url_path,
-                        params=params,
-                        ssl=False,
-                ) as response:
-                    if response.status == 200:
-                        response_dict["headers"] = response.headers
-                        response_dict["status"] = response.status
-                        if response.headers.get("content-type").find("text") != -1:
-                            response_dict["response"] = await response.text()
-                        else:
-                            response_dict["response"] = await response.json()
-                            await cache_metadata(url_detail=url_detail, metadata=response_dict["response"])
+                        response_dict["response"] = await response.json()
+                        await cache_metadata(
+                            url_detail=url_detail, metadata=response_dict["response"]
+                        )
 
-                        return response_dict
-                    else:
-                        response_dict["status"] = response.status
+                    return response_dict
+                else:
+                    response_dict["status"] = response.status
         except ClientResponseError as client_error:
             response_dict["status"] = client_error.status
 

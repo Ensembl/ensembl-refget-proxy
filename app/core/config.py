@@ -39,7 +39,9 @@ config = Config(".env")
 DEBUG: bool = config("DEBUG", cast=bool, default=True)
 PROJECT_NAME: str = config("PROJECT_NAME", default="Ensembl Refget Proxy")
 ALLOWED_HOSTS: List[str] = config(
-    "ALLOWED_HOSTS", cast=CommaSeparatedStrings, default="*",
+    "ALLOWED_HOSTS",
+    cast=CommaSeparatedStrings,
+    default="*",
 )
 
 # logging configuration
@@ -54,3 +56,5 @@ for logger_name in LOGGERS:
     logging_logger.handlers = [InterceptHandler(level=LOGGING_LEVEL)]
 
 logger.configure(handlers=[{"sink": sys.stderr, "level": LOGGING_LEVEL}])
+
+HTTP_PROXY = environ.get("HTTP_PROXY", "")

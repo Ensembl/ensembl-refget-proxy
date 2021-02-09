@@ -37,12 +37,19 @@ async def get_sequence(request: Request, checksum: str):
     Return Refget sequence based on a sequence checksum.
     """
     params = request.query_params
-    headers = {header: request.headers.get(header) for header in request.headers if header != 'host'}
+    headers = {
+        header: request.headers.get(header)
+        for header in request.headers
+        if header != "host"
+    }
     url_path = "sequence/" + checksum
 
     try:
         result = await create_request_coroutine(
-            checksum=checksum, url_path=url_path, headers=headers, params=params,
+            checksum=checksum,
+            url_path=url_path,
+            headers=headers,
+            params=params,
         )
         if result["status"] == 200:
             return responses.Response(result["response"], headers=result["headers"])
@@ -72,16 +79,25 @@ async def get_sequence_metadata(request: Request, checksum: str):
 
     try:
         params = request.query_params
-        headers = {header: request.headers.get(header) for header in request.headers if header != 'host'}
+        headers = {
+            header: request.headers.get(header)
+            for header in request.headers
+            if header != "host"
+        }
 
         result = await create_request_coroutine(
-            checksum=checksum, url_path=url_path, headers=headers, params=params,
+            checksum=checksum,
+            url_path=url_path,
+            headers=headers,
+            params=params,
         )
         if result["status"] != 200:
             return response_error_handler(result)
         else:
             return responses.Response(
-                json.dumps(result["response"]), headers={"accept": "application/json"}, status_code=result["status"]
+                json.dumps(result["response"]),
+                headers={"accept": "application/json"},
+                status_code=result["status"],
             )
 
     except (ClientResponseError, Exception) as e:

@@ -83,6 +83,9 @@ def http_416_range_not_satisfied():
 
 def http_501_not_implemented():
     response_msg = json.dumps(
-        {"status_code": HTTP_501_NOT_IMPLEMENTED, "details": "Not Implemented",}
+        {
+            "status_code": HTTP_501_NOT_IMPLEMENTED,
+            "details": "Not Implemented",
+        }
     )
     return PlainTextResponse(response_msg, status_code=HTTP_501_NOT_IMPLEMENTED)
