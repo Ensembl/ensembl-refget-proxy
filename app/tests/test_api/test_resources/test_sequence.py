@@ -40,7 +40,7 @@ class APISequenceTestCase(unittest.TestCase):
 
     def test_api_error_404(self):
         get_response = self.client.get(self.sequence_not_found_path)
-        logger.log("DEBUG", metadata_url_list(get_response.status_code))
+        logger.log("DEBUG", get_response)
 
         assert get_response.status_code == 404
 
