@@ -15,7 +15,7 @@
 #
 
 import unittest
-
+from loguru import logger
 from fastapi.testclient import TestClient
 
 from api.utils import metadata_url_list
@@ -89,7 +89,7 @@ class APISequenceTestCase(unittest.TestCase):
         }
 
     def test_metadata_url_list(self):
-        from loguru import logger
+
 
         logger.log("DEBUG", metadata_url_list(self.checksum))
         assert metadata_url_list(self.checksum) == [
