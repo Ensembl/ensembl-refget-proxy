@@ -31,7 +31,7 @@ class APISequenceTestCase(unittest.TestCase):
         self.checksum = "6681ac2f62509cfc220d78751b8dc524"
         self.refget_url = "http://test.service.refget.review.ensembl.org/"
         self.sequence_path = self.sequence_url_prefix + self.checksum
-        self.sequence_not_found_path = self.sequence_url_prefix + "6681ac2f62751b8dc845"
+        self.sequence_not_found_path = self.sequence_url_prefix + "randomstring"
 
     def test_404_error_in_none_relative_requests(self):
         response = self.client.get("api/")
