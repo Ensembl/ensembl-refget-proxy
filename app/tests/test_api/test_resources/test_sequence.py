@@ -40,6 +40,8 @@ class APISequenceTestCase(unittest.TestCase):
 
     def test_api_error_404(self):
         get_response = self.client.get(self.sequence_not_found_path)
+        logger.log("DEBUG", metadata_url_list(get_response.status_code))
+
         assert get_response.status_code == 404
 
     def test_api_error_405(self):
@@ -91,13 +93,10 @@ class APISequenceTestCase(unittest.TestCase):
 
         logger.log("DEBUG", metadata_url_list(self.checksum))
         assert metadata_url_list(self.checksum) == [
-            {
-                "refget_server_url": self.refget_url,
-                "checksum": "6681ac2f62509cfc220d78751b8dc524",
-                "metadata_url": self.refget_url
-                + "sequence/6681ac2f62509cfc220d78751b8dc524/metadata",
-            }
-        ]
+            {'refget_server_url': 'http://test.service.refget.review.ensembl.org/',
+             'checksum': '6681ac2f62509cfc220d78751b8dc524',
+             'metadata_url': 'http://test.service.refget.review.ensembl.org/sequence/6681ac2f62509cfc220d78751b8dc524/metadata',
+             'is_url': True}]
 
 
 if __name__ == "__main__":
