@@ -33,7 +33,7 @@ REFGET_SERVER_URL_LIST: List[str] = list(
 )
 
 REDIS_HOST: str = environ.get("REDIS_HOST", "redis")
-REDIS_PORT: int = int(environ.get("REDIS_PORT", 6379))
+REDIS_PORT: str = environ.get("REDIS_PORT", "6379")
 
 config = Config(".env")
 DEBUG: bool = config("DEBUG", cast=bool, default=True)
