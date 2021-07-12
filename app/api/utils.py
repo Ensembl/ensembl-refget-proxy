@@ -52,7 +52,7 @@ async def create_request_coroutine(url_list, url_path, headers, params):
     """
     try:
         async with aiohttp.ClientSession(
-                raise_for_status=True, read_timeout=None, trust_env=True
+            raise_for_status=True, read_timeout=None
         ) as session:
             coroutines = [
                 asyncio.ensure_future(find_result_url(session=session, url=url))
