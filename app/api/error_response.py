@@ -27,8 +27,6 @@ from starlette.status import (
 
 
 def response_error_handler(result):
-    if result["status"] == 501:
-        return http_501_not_implemented()
     if result["status"] == 416:
         return http_416_range_not_satisfied()
     if result["status"] == 406:
