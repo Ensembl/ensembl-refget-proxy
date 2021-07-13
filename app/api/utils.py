@@ -58,7 +58,7 @@ def metadata_url_list(checksum):
             {
                 "refget_server_url": url,
                 "checksum": checksum,
-                "metadata_url": url + "sequence/" + checksum + "/metadata",
+                "metadata_url": url + "sequence/" + str(checksum) + "/metadata",
                 "is_url": is_url_valid(url),
             }
         )
@@ -92,7 +92,7 @@ async def find_result_url(session, url_detail):
     except (ClientResponseError, ClientConnectorError) as e:
         asyncio.current_task().remove_done_callback(asyncio.current_task)
         asyncio.current_task().cancel()
-        url_result = ""
+        url_result = {}
 
     return url_result
 
@@ -121,7 +121,6 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                 for task in done:
                     if not task.cancelled():
                         url_detail = task.result()
-
             if url_detail.get("is_url"):
                 return await get_result(
                     url_detail=url_detail,
@@ -137,7 +136,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                     url_path=url_path,
                     headers=headers,
                     params=params,
-                )
+                    )
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION: " + str(e))
@@ -149,7 +148,7 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
     """
     response_dict = {"response": "", "headers": {}, "status": 404}
 
-    if url_detail:
+    if url_detail != {}:
         try:
             async with session.get(
                 url=url_detail["refget_server_url"] + url_path,
