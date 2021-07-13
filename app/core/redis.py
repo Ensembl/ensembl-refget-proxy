@@ -69,6 +69,7 @@ async def get_cached_url(checksum):
     Get cached url from redis.
     """
     try:
+        url_result = {}
         async with RedisConnection() as redis:
             url = await asyncio.ensure_future(redis.get(checksum, encoding="utf-8"))
             if url:
@@ -77,7 +78,7 @@ async def get_cached_url(checksum):
                     "checksum": checksum,
                     "metadata_url": url + "sequence/" + checksum + "/metadata",
                 }
-                return url_result
+            return url_result
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
 
