@@ -111,4 +111,4 @@ async def get_cached_metadata(checksum):
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
-        return json.loads({}, encoding="utf-8")
+        return json.loads("{}", encoding="utf-8")
