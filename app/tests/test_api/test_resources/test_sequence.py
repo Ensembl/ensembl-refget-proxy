@@ -92,8 +92,6 @@ class APISequenceTestCase(unittest.TestCase):
         }
 
     def test_metadata_url_list(self):
-
-
         logger.log("DEBUG", metadata_url_list(self.checksum))
         assert metadata_url_list(self.checksum) == [
             {'refget_server_url': 'http://test.service.refget.review.ensembl.org/',
