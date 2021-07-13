@@ -81,6 +81,7 @@ async def get_cached_url(checksum):
             return url_result
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
+        return {}
 
 
 async def cache_metadata(url_detail, metadata):
@@ -110,3 +111,4 @@ async def get_cached_metadata(checksum):
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
+        return json.loads({}, encoding="utf-8")
