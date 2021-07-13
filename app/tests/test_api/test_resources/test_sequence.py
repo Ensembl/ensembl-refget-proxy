@@ -31,7 +31,7 @@ class APISequenceTestCase(unittest.TestCase):
         self.checksum = "6681ac2f62509cfc220d78751b8dc524"
         self.refget_url = "http://test.service.refget.review.ensembl.org/"
         self.sequence_path = self.sequence_url_prefix + self.checksum
-        self.sequence_not_found_path = self.sequence_url_prefix + "randomstring"
+        self.sequence_not_found_path = self.sequence_url_prefix + "6681ac2f62751b8dc845"
 
     def test_404_error_in_none_relative_requests(self):
         response = self.client.get("api/")
@@ -40,7 +40,7 @@ class APISequenceTestCase(unittest.TestCase):
 
     def test_api_error_404(self):
         get_response = self.client.get(self.sequence_not_found_path)
-        logger.log("DEBUG", get_response)
+        logger.log("DEBUG", metadata_url_list(get_response.status_code))
 
         assert get_response.status_code == 404
 
@@ -66,6 +66,7 @@ class APISequenceTestCase(unittest.TestCase):
 
     def test_sequence_api_416_range_not_satisfied(self):
         get_response = self.client.get(self.sequence_path + "?start=12&end=10")
+        logger.log("DEBUG", get_response)
         assert get_response.status_code == 416
 
     def test_sequence_metadata_api_success_200(self):
@@ -73,6 +74,8 @@ class APISequenceTestCase(unittest.TestCase):
         assert get_response.status_code == 200
         assert len(get_response.json()) == 1
         assert type(get_response.json()) == dict
+        logger.log("DEBUG", get_response)
+        logger.log("DEBUG", get_response.json())
         assert get_response.json() == {
             "metadata": {
                 "aliases": [
