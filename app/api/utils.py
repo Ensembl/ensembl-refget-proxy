@@ -121,25 +121,26 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                 for task in done:
                     if not task.cancelled():
                         url_detail = task.result()
-            if url_detail["is_url"]:
-                return await get_result(
-                    url_detail=url_detail,
-                    session=session,
-                    url_path=url_path,
-                    headers=headers,
-                    params=params,
-                )
-            else:
-                return await get_result_proxy(
-                    url_detail=url_detail,
-                    session=session,
-                    url_path=url_path,
-                    headers=headers,
-                    params=params,
-                )
+            if url_detail:
+                if url_detail["is_url"]:
+                    return await get_result(
+                        url_detail=url_detail,
+                        session=session,
+                        url_path=url_path,
+                        headers=headers,
+                        params=params,
+                    )
+                else:
+                    return await get_result_proxy(
+                        url_detail=url_detail,
+                        session=session,
+                        url_path=url_path,
+                        headers=headers,
+                        params=params,
+                    )
 
     except Exception as e:
-        logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
+        logger.log("DEBUG", "UNHANDLED EXCEPTION: " + str(e))
 
 
 async def get_result_proxy(url_detail, session, url_path, headers, params):
