@@ -108,7 +108,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
         async with aiohttp.ClientSession(
             raise_for_status=True, read_timeout=None
         ) as session:
-            if url_detail is None:
+            if url_detail == {}:
                 url_list = metadata_url_list(checksum)
 
                 coroutines = [
@@ -121,23 +121,23 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                 for task in done:
                     if not task.cancelled():
                         url_detail = task.result()
-            if url_detail:
-                if url_detail["is_url"]:
-                    return await get_result(
-                        url_detail=url_detail,
-                        session=session,
-                        url_path=url_path,
-                        headers=headers,
-                        params=params,
-                    )
-                else:
-                    return await get_result_proxy(
-                        url_detail=url_detail,
-                        session=session,
-                        url_path=url_path,
-                        headers=headers,
-                        params=params,
-                    )
+
+            if url_detail.get("is_url"):
+                return await get_result(
+                    url_detail=url_detail,
+                    session=session,
+                    url_path=url_path,
+                    headers=headers,
+                    params=params,
+                )
+            else:
+                return await get_result_proxy(
+                    url_detail=url_detail,
+                    session=session,
+                    url_path=url_path,
+                    headers=headers,
+                    params=params,
+                )
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION: " + str(e))
