@@ -184,7 +184,7 @@ async def get_result(url_detail, session, url_path, headers, params):
     """
     response_dict = {"response": "", "headers": {}, "status": 404}
 
-    if url_detail:
+    if url_detail != {}:
         try:
             async with session.get(
                 url=url_detail["refget_server_url"] + url_path,
