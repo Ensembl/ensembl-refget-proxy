@@ -18,6 +18,3 @@ spec:
         ports:
         - containerPort: 6379
         imagePullPolicy: Always
-        envFrom:
-        - configMapRef:
-            name: ensembl-refget-proxy-redis-configmap
