@@ -13,4 +13,3 @@ data:
 kind: ConfigMap
 metadata:
   name: ensembl-refget-proxy-configmap
-  namespace: ensembl-dev
