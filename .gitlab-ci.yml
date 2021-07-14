@@ -16,7 +16,7 @@
 
 variables:
     DOCKER_TLS_CERTDIR: ""
-    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
 
 stages:
   - test
@@ -34,9 +34,9 @@ stages:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     #
-    - docker build -t ${CONTAINER_IMAGE} --no-cache .
-    - docker push ${CONTAINER_IMAGE}
-    - docker rmi ${CONTAINER_IMAGE}
+    - docker build -t ${DOCKER_IMAGE} --no-cache .
+    - docker push ${DOCKER_IMAGE}
+    - docker rmi ${DOCKER_IMAGE}
     - docker logout $CI_REGISTRY
 
 .deploy:
