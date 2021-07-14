@@ -20,13 +20,13 @@ variables:
 
 stages:
   - test
-  - build_docker_image
+  - build
   - deploy
   - compliance
 
 # Template to build to docker image
 .build:
-  stage: build_docker_image
+  stage: build
   image: docker
   services:
     - docker:dind
@@ -39,35 +39,95 @@ stages:
     - docker rmi ${CONTAINER_IMAGE}
     - docker logout $CI_REGISTRY
 
-.deploy-wp:
+.deploy:
   stage: deploy
-  image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:0.1
+  image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:0.4
+  before_script:
+    - cd k8s/base
 
   script:
-  - git clone https://gitlab.ebi.ac.uk/kamal/ensembl-client-caas-deploy.git
-  - git -C ensembl-client-caas-deploy/ checkout ensembl_refget_proxy_caas_deploy
-  - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-  - sed -i "s#<DOCKER_IMAGE>#${CONTAINER_IMAGE}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-  - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
-  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
+    - kustomize edit set image DOCKER_IMAGE=${DOCKER_IMAGE}
+    - kustomize build . | kubectl apply -f -
 
-# Template to deploy to WP k8s cluster
+Docker:
+  extends: .build
 
-.deploy-wp-feature:
-  stage: deploy
-  image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:0.1
+Review:HX:
+  extends: .deploy
+  environment:
+    name : wp-hx-dev
+  before_script:
+    - cd k8s/overlays/review
+    - kustomize edit set label environment:${CI_COMMIT_REF_SLUG}
+    - kustomize edit set namesuffix ${CI_COMMIT_REF_SLUG}
+    - kustomize edit set image DOCKER_IMAGE=${DOCKER_IMAGE}
 
-  script:
-  - git clone https://gitlab.ebi.ac.uk/kamal/ensembl-client-caas-deploy.git
-  - git -C ensembl-client-caas-deploy/ checkout ensembl_refget_proxy_caas_deploy
-  #replace container image tag with branch name tag
-  - sed -i "s#<DOCKER_IMAGE>#${CONTAINER_IMAGE}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-  - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-  - sed -i "s#<DEPLOYMENT_ENV>#${CI_COMMIT_REF_SLUG}#g" ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
-  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_deployment.yaml
-  - kubectl apply -f ensembl-client-caas-deploy/ensembl_refget_proxy_service.yaml
-  variables:
-    DOCKERFILE: Dockerfile.prod
+  except:
+    - master
+
+Dev:HX:
+  extends: .deploy
+  environment:
+    name: wp-hx-dev-ing
+  before_script:
+    - cd k8s/overlays/development
+  only:
+    - master
+
+Staging:HX:
+  extends: .deploy
+  environment:
+    name : wp-hx-staging
+  before_script:
+    - cd k8s/overlays/staging
+  only:
+    - master
+
+Staging:HL:
+  extends: .deploy
+  environment:
+    name : wp-hh-staging
+  before_script:
+    - cd k8s/overlays/staging
+  only:
+    - master
+
+Internal:HX:
+  extends: .deploy
+  environment:
+    name : wp-hx-internal
+  before_script:
+    - cd k8s/overlays/internal
+  only:
+    - master
+
+Internal:HL:
+  extends: .deploy
+  environment:
+    name : wp-hh-internal
+  before_script:
+    - cd k8s/overlays/internal
+  only:
+    - master
+
+Production:HX:
+  extends: .deploy
+  environment:
+    name : wp-hx-live
+  before_script:
+    - cd k8s/overlays/production
+  only:
+    - master
+
+Production:HL:
+  extends: .deploy
+  environment:
+    name : wp-hh-live
+  before_script:
+    - cd k8s/overlays/production
+  only:
+    - master
+
 
 # Run Tests
 Test:
@@ -86,71 +146,11 @@ Test:
     - python -m unittest
 
 # Run Compliance Test on refget url
-Compliance-Test:
-  stage: compliance
-  image: python:3.8
-  script:
-    - pip install refget-compliance
-    - refget-compliance report -s http://${CI_COMMIT_REF_SLUG}.dev.refget.review.ensembl.org/api/ --json server.json
-    - cat server.json
-  when: manual
-
-# Deploy staging to WP-HX cluster
-Staging:WP-HX:
-  extends: .deploy-wp
-  environment:
-    name : wp-hx-staging
-
-  only:
-  - dev
-  when: manual
-
-# Deploy dev to WP-HX cluster
-Docker-IMG:Dev:
-  extends: .build
-  variables:
-    DOCKERFILE: Dockerfile
-
-  only:
-  - dev
-
-Dev:WP-HX:
-  extends: .deploy-wp
-  environment:
-    name : wp-hx-dev-grp
-
-  only:
-  - dev
-
-
-Docker-IMG:feature:
-  extends: .build
-  variables:
-    DOCKERFILE: Dockerfile.feature
-
-  only:
-  - /^feature\/.*$/
-  - /^refactor\/.*$/
-  when: manual
-
-
-Feature:wp-feature:
-  extends: .deploy-wp-feature
-  variables:
-    DEPLOY_TAG: ${CI_COMMIT_REF_SLUG}
-  environment:
-    name : hx
-  only:
-  - /^feature\/.*$/
-  when: manual
-
-
-# Deploy live to WP-HH cluster
-Live:WP-HH:
-  extends: .deploy-wp
-  environment:
-    name : wp-hh-live
-
-  only:
-  - master
-
+#Compliance-Test:
+#  stage: compliance
+#  image: python:3.8
+#  script:
+#    - pip install refget-compliance
+#    - refget-compliance report -s http://ensembl-solr-search-svc/api/ --json server.json
+#    - cat server.json
+#  when: manual

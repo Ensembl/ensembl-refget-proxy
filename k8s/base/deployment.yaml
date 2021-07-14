@@ -1,0 +1,25 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: ensembl-refget-proxy-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ensembl-refget-proxy
+        RUP: nickl
+    spec:
+      imagePullSecrets:
+        - name: ensembl-refget-proxy-pull-secret
+      containers:
+      - name: ensembl-refget-proxy
+        image: DOCKER_IMAGE
+        # command: ["gunicorn"]
+        # args: ["-w 4", "--bind=0.0.0.0:8083", "--preload", "-t 120", "main:app", "-k uvicorn.workers.UvicornWorker"]
+        ports:
+        - containerPort: 8083
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: ensembl-refget-proxy-configmap

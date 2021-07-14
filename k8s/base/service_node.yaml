@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ensembl-solr-search-svc-node
+  labels:
+    app: ensembl-solr-search-svc-node
+spec:
+  selector:
+    app: ensembl-solr-search
+  type: NodePort
+  ports:
+    - port: 8983
+      protocol: TCP
+      targetPort: 8983

@@ -1,0 +1,23 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: ensembl-refget-proxy-redis-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ensembl-refget-proxy-redis-deployment
+        RUP: nickl
+    spec:
+      imagePullSecrets:
+        - name: ensembl-refget-proxy-pull-secret
+      containers:
+      - name: ensembl-refget-proxy-redis
+        image: redis
+        ports:
+        - containerPort: 6379
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: ensembl-refget-proxy-redis-configmap
