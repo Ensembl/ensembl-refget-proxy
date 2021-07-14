@@ -1,2 +1,0 @@
-# ensembl-refget-proxy
-
