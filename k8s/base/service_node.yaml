@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ensembl-refget-proxy-dev-svc
+  name: ensembl-refget-proxy-node-svc
   labels:
-    app: ensembl-refget-proxy-dev-svc
+    app: ensembl-refget-proxy-node-svc
 spec:
   selector:
-    app: ensembl-refget-proxy-dev
+    app: ensembl-refget-proxy
   type: NodePort
   ports:
     - port: 8083
