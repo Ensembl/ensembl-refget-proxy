@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  DEPLOYMENT_SCHEME: http
+  PORT: "8083"
+  REFGET_SERVER_URL_LIST: https://www.ebi.ac.uk/ena/cram/,http://dev.service.refget.review.ensembl.org/
+  HTTP_PROXY: http://hx-wwwcache.ebi.ac.uk:3128
+  HTTPS_PROXY: http://hx-wwwcache.ebi.ac.uk:3128
+  http_proxy: http://hx-wwwcache.ebi.ac.uk:3128
+  https_proxy: http://hx-wwwcache.ebi.ac.uk:3128
+  no_proxy: localhost,.cluster.local
+  REDIS_HOST: ensembl-refget-proxy-redis-svc
+  REDIS_PORT: "6379"
+kind: ConfigMap
+metadata:
+  name: ensembl-refget-proxy-configmap

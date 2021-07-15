@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ensembl-refget-proxy-redis-svc
+  labels:
+    app: ensembl-refget-proxy-redis-svc
+spec:
+  selector:
+    app: ensembl-refget-proxy-redis
+  type: NodePort
+  ports:
+    - port: 6379
+      protocol: TCP
+      targetPort: 6379
