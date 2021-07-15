@@ -7,14 +7,12 @@ spec:
   template:
     metadata:
       labels:
-        app: ensembl-refget-proxy-redis
+        app: ensembl-refget-proxy-redis-deployment
         RUP: nickl
     spec:
-      imagePullSecrets:
-        - name: ensembl-refget-proxy-pull-secret
       containers:
       - name: ensembl-refget-proxy-redis
-        image: redis
+        image: dockerhub.ebi.ac.uk/mcharkhchi/ensembl-refget-proxy-redis:v0.1
         ports:
         - containerPort: 6379
         imagePullPolicy: Always
