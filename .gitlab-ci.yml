@@ -129,20 +129,20 @@ Production:HL:
 
 
 # Run Tests
-Test:
-  stage: test
+# Test:
+#   stage: test
 
-  image: python:3.8
+#   image: python:3.8
 
-  variables:
-    REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
-  script:
-    - pip install poetry==1.0.*
-    - poetry config virtualenvs.create false
-    - poetry install --no-dev
-    - cp -R ./app/ /app/
-    - cd /app
-    - python -m unittest
+#   variables:
+#     REFGET_SERVER_URL_LIST: $REFGET_SERVER_URL_LIST
+#   script:
+#     - pip install poetry==1.0.*
+#     - poetry config virtualenvs.create false
+#     - poetry install --no-dev
+#     - cp -R ./app/ /app/
+#     - cd /app
+#     - python -m unittest
 
 # Run Compliance Test on refget url
 #Compliance-Test:
