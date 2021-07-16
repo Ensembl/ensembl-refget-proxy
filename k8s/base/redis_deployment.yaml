@@ -7,7 +7,7 @@ spec:
   template:
     metadata:
       labels:
-        app: ensembl-refget-proxy-redis-deployment
+        app: ensembl-refget-proxy-redis
         RUP: nickl
     spec:
       containers:
