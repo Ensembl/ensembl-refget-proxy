@@ -11,7 +11,7 @@ spec:
         RUP: nickl
     spec:
       imagePullSecrets:
-        - name: ensembl-refget-proxy-pull-secret
+        - name: ensemblweb-pull-secret
       containers:
       - name: ensembl-refget-proxy
         image: DOCKER_IMAGE

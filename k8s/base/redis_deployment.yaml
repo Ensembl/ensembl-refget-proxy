@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: ensembl-refget-proxy-redis
-        image: dockerhub.ebi.ac.uk/mcharkhchi/ensembl-refget-proxy-redis:v0.1
+        image: redis:6.2.4
         ports:
         - containerPort: 6379
         imagePullPolicy: Always
