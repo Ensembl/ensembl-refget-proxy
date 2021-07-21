@@ -122,7 +122,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                     if not task.cancelled():
                         url_detail = task.result()
             if url_detail.get("is_url"):
-                return await get_result(
+                return await get_result_proxy(
                     url_detail=url_detail,
                     session=session,
                     url_path=url_path,
@@ -130,7 +130,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                     params=params,
                 )
             else:
-                return await get_result_proxy(
+                return await get_result(
                     url_detail=url_detail,
                     session=session,
                     url_path=url_path,
