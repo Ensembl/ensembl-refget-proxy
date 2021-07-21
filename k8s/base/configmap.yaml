@@ -7,7 +7,7 @@ data:
   HTTPS_PROXY: http://hx-wwwcache.ebi.ac.uk:3128
   http_proxy: http://hx-wwwcache.ebi.ac.uk:3128
   https_proxy: http://hx-wwwcache.ebi.ac.uk:3128
-  no_proxy: localhost,.cluster.local
+  no_proxy: localhost,.cluster.local,ensembl-refget-proxy-svc
   REDIS_HOST: ensembl-refget-proxy-redis-svc
   REDIS_PORT: "6379"
 kind: ConfigMap
