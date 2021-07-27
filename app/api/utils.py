@@ -80,8 +80,8 @@ async def find_result_url(session, url_detail):
 
             async with aiohttp.ClientSession(
                     raise_for_status=True, read_timeout=10, trust_env=True
-            ) as session:
-                async with session.get(
+            ) as proxy_session:
+                async with proxy_session.get(
                         url_detail["metadata_url"]
                 ) as response:
                     if response.status == 200:
@@ -157,8 +157,8 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
         try:
             async with aiohttp.ClientSession(
                     raise_for_status=True, read_timeout=10, trust_env=True
-            ) as session:
-                async with session.get(
+            ) as proxy_session:
+                async with proxy_session.get(
                         url=url_detail["refget_server_url"] + url_path,
                         params=params,
                         ssl=False,
