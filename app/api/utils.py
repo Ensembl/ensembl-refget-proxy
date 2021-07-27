@@ -76,8 +76,8 @@ async def find_result_url(session, url_detail):
 
     try:
 
+        logger.log("DEBUG",str(url_detail))
         if url_detail["is_url"]:
-            logger.log("DEBUG",str(url_detail))
             async with aiohttp.ClientSession(
                     raise_for_status=True, trust_env=True
             ) as proxy_session:
