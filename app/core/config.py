@@ -15,10 +15,13 @@
 #
 
 import logging
+import socket
 import sys
+from logging.handlers import SocketHandler
 from os import environ
 from typing import List
 
+import requests
 from loguru import logger
 from starlette.config import Config
 from starlette.datastructures import CommaSeparatedStrings
@@ -48,13 +51,25 @@ ALLOWED_HOSTS: List[str] = config(
 
 
 LOGGING_LEVEL = logging.DEBUG if DEBUG else logging.INFO
-LOGGERS = ("uvicorn.asgi", "uvicorn.access")
+LOGGERS = ("uvicorn.asgi", "gunicorn.access")
+log = logging.getLogger("gunicorn.access")
 
-logging.getLogger().handlers = [InterceptHandler()]
+udp_handler = logging.handlers.SysLogHandler(address=('hx-rke-wp-webadmin-14-worker-1.caas.ebi.ac.uk', 32118), socktype=socket.SOCK_DGRAM)
+# http_handler = logging.handlers.HTTPHandler(host='',)
+
+udp_handler.setLevel(LOGGING_LEVEL)
+logging.getLogger().handlers = [InterceptHandler(), udp_handler]
+
+log.addHandler(udp_handler)
+log.setLevel(LOGGING_LEVEL)
+log.handlers = [udp_handler]
+
+
 for logger_name in LOGGERS:
     logging_logger = logging.getLogger(logger_name)
-    logging_logger.handlers = [InterceptHandler(level=LOGGING_LEVEL)]
+    logging_logger.handlers = [InterceptHandler(level=LOGGING_LEVEL), udp_handler]
 
 logger.configure(handlers=[{"sink": sys.stderr, "level": LOGGING_LEVEL}])
 
 HTTP_PROXY = environ.get("HTTP_PROXY", "")
+HTTPS_PROXY = environ.get("HTTPS_PROXY", "")

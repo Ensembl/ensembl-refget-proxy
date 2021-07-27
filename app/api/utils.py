@@ -22,7 +22,7 @@ import aiohttp
 from aiohttp import ClientResponseError, ClientConnectorError
 from loguru import logger
 
-from core.config import REFGET_SERVER_URL_LIST, HTTP_PROXY
+from core.config import REFGET_SERVER_URL_LIST, HTTP_PROXY, HTTPS_PROXY
 from core.logging import InterceptHandler
 from core.redis import cache_metadata, cache_url, get_cached_url
 
@@ -54,6 +54,7 @@ def metadata_url_list(checksum):
         url = url.strip()
         if not url.endswith("/"):
             url = url + "/"
+
         url_list.append(
             {
                 "refget_server_url": url,
@@ -78,7 +79,7 @@ async def find_result_url(session, url_detail):
         if url_detail["is_url"]:
 
             async with session.get(
-                url_detail["metadata_url"], proxy=HTTP_PROXY
+                url_detail["metadata_url"], proxy=HTTPS_PROXY
             ) as response:
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
@@ -155,7 +156,7 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
                 params=params,
                 ssl=False,
                 headers=headers,
-                proxy=HTTP_PROXY,
+                proxy=HTTPS_PROXY,
             ) as response:
                 if response.status == 200:
                     response_dict["headers"] = response.headers
