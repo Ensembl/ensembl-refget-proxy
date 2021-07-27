@@ -77,13 +77,18 @@ async def find_result_url(session, url_detail):
     try:
 
         if url_detail["is_url"]:
-            async with session.get(
-                url_detail["metadata_url"], proxy=HTTP_PROXY
-            ) as response:
-                if response.status == 200:
-                    await cache_url(url_detail=url_detail)
-                    url_result = url_detail
+            print("----", url_detail)
+            async with aiohttp.ClientSession(
+                    raise_for_status=True, read_timeout=None
+            ) as session:
+                async with session.get(
+                    url_detail["metadata_url"], proxy=HTTP_PROXY
+                ) as response:
+                    if response.status == 200:
+                        await cache_url(url_detail=url_detail)
+                        url_result = url_detail
         else:
+            print(url_detail)
             async with session.get(url_detail["metadata_url"]) as response:
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
@@ -150,26 +155,30 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
 
     if url_detail != {}:
         try:
-            async with session.get(
-                url=url_detail["refget_server_url"] + url_path,
-                params=params,
-                headers=headers,
-                proxy=HTTP_PROXY,
-            ) as response:
-                if response.status == 200:
-                    response_dict["headers"] = response.headers
-                    response_dict["status"] = response.status
-                    if response.headers.get("content-type").find("text") != -1:
-                        response_dict["response"] = await response.text()
-                    else:
-                        response_dict["response"] = await response.json()
-                        await cache_metadata(
-                            url_detail=url_detail, metadata=response_dict["response"]
-                        )
+            async with aiohttp.ClientSession(
+                    raise_for_status=True, read_timeout=None, trust_env=True
+            ) as session:
+                async with session.get(
+                    url=url_detail["refget_server_url"] + url_path,
+                    params=params,
+                    ssl=False,
+                    headers=headers,
+                    proxy=HTTP_PROXY,
+                ) as response:
+                    if response.status == 200:
+                        response_dict["headers"] = response.headers
+                        response_dict["status"] = response.status
+                        if response.headers.get("content-type").find("text") != -1:
+                            response_dict["response"] = await response.text()
+                        else:
+                            response_dict["response"] = await response.json()
+                            await cache_metadata(
+                                url_detail=url_detail, metadata=response_dict["response"]
+                            )
 
-                    return response_dict
-                else:
-                    response_dict["status"] = response.status
+                        return response_dict
+                    else:
+                        response_dict["status"] = response.status
 
         except ClientResponseError as client_error:
             response_dict["status"] = client_error.status
