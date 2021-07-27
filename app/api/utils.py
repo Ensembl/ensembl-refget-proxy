@@ -111,7 +111,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
 
         url_detail = await get_cached_url(checksum)
         async with aiohttp.ClientSession(
-                raise_for_status=True,
+                raise_for_status=True, trust_env=True
         ) as session:
             if url_detail == {}:
                 url_list = metadata_url_list(checksum)
