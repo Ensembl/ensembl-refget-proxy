@@ -153,7 +153,6 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
             async with session.get(
                 url=url_detail["refget_server_url"] + url_path,
                 params=params,
-                ssl=False,
                 headers=headers,
                 proxy=HTTP_PROXY,
             ) as response:
