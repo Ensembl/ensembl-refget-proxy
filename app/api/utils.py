@@ -79,7 +79,7 @@ async def find_result_url(session, url_detail):
         if url_detail["is_url"]:
 
             async with aiohttp.ClientSession(
-                    raise_for_status=True, read_timeout=10, trust_env=True
+                    raise_for_status=True, trust_env=True
             ) as proxy_session:
                 async with proxy_session.get(
                         url_detail["metadata_url"]
@@ -111,7 +111,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
 
         url_detail = await get_cached_url(checksum)
         async with aiohttp.ClientSession(
-                raise_for_status=True, read_timeout=None
+                raise_for_status=True,
         ) as session:
             if url_detail == {}:
                 url_list = metadata_url_list(checksum)
@@ -127,6 +127,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                     if not task.cancelled():
                         url_detail = task.result()
             if url_detail.get("is_url"):
+                logger.log('DEBUG', str(url_detail))
                 return await get_result_proxy(
                     url_detail=url_detail,
                     session=session,
@@ -156,14 +157,15 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
     if url_detail != {}:
         try:
             async with aiohttp.ClientSession(
-                    raise_for_status=True, read_timeout=10, trust_env=True
+                    raise_for_status=True, trust_env=True
             ) as proxy_session:
+                logger.log('DEBUG', str(session))
                 async with proxy_session.get(
                         url=url_detail["refget_server_url"] + url_path,
                         params=params,
-                        ssl=False,
                         headers=headers,
                 ) as response:
+                    logger.log('DEBUG', str(response.status))
                     if response.status == 200:
                         response_dict["headers"] = response.headers
                         response_dict["status"] = response.status
