@@ -77,7 +77,7 @@ async def find_result_url(session, url_detail):
     try:
 
         if url_detail["is_url"]:
-            logger.log("---- " + str(url_detail), "DEBUG")
+
             async with aiohttp.ClientSession(
                     raise_for_status=True, read_timeout=10, trust_env=True
             ) as session:
@@ -88,7 +88,7 @@ async def find_result_url(session, url_detail):
                         await cache_url(url_detail=url_detail)
                         url_result = url_detail
         else:
-            logger.log(str(url_detail), "DEBUG")
+
             async with session.get(url_detail["metadata_url"]) as response:
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
