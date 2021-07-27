@@ -79,7 +79,7 @@ async def find_result_url(session, url_detail):
         if url_detail["is_url"]:
             print("----", url_detail)
             async with aiohttp.ClientSession(
-                    raise_for_status=True, read_timeout=None
+                    raise_for_status=True, read_timeout=None, trust_env=True
             ) as session:
                 async with session.get(
                     url_detail["metadata_url"], proxy=HTTP_PROXY
