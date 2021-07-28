@@ -87,11 +87,12 @@ class APISequenceTestCase(unittest.TestCase):
         }
 
     def test_metadata_url_list(self):
+        print(metadata_url_list(self.checksum),"===========")
         assert metadata_url_list(self.checksum) == [
             {'refget_server_url': 'http://test.service.refget.review.ensembl.org/',
              'checksum': '6681ac2f62509cfc220d78751b8dc524',
              'metadata_url': 'http://test.service.refget.review.ensembl.org/sequence/6681ac2f62509cfc220d78751b8dc524/metadata',
-             'is_url': True}]
+             'is_url': False}]
 
 
 if __name__ == "__main__":
