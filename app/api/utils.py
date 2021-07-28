@@ -67,7 +67,7 @@ def metadata_url_list(checksum):
     return url_list
 
 
-async def find_result_url(session, url_detail):
+async def find_result_url(url_detail):
     """
     Send a request to metadata URL to check status. status: 200 will return url otherwise it will cancel to coroutine job and return "".
     session: aiohttp session
@@ -88,11 +88,13 @@ async def find_result_url(session, url_detail):
                         await cache_url(url_detail=url_detail)
                         url_result = url_detail
         else:
-
-            async with session.get(url_detail["metadata_url"]) as response:
-                if response.status == 200:
-                    await cache_url(url_detail=url_detail)
-                    url_result = url_detail
+            async with aiohttp.ClientSession(
+                    raise_for_status=True
+            ) as session:
+                async with session.get(url_detail["metadata_url"]) as response:
+                    if response.status == 200:
+                        await cache_url(url_detail=url_detail)
+                        url_result = url_detail
 
     except (ClientResponseError, ClientConnectorError) as e:
         asyncio.current_task().remove_done_callback(asyncio.current_task)
@@ -110,45 +112,41 @@ async def create_request_coroutine(checksum, url_path, headers, params):
     try:
 
         url_detail = await get_cached_url(checksum)
-        async with aiohttp.ClientSession(
-                raise_for_status=True,
-        ) as session:
-            if url_detail == {}:
-                url_list = metadata_url_list(checksum)
 
-                coroutines = [
-                    asyncio.ensure_future(
-                        find_result_url(session=session, url_detail=url_detail)
-                    )
-                    for url_detail in url_list
-                ]
-                done, pending = await asyncio.wait(coroutines)
-                for task in done:
-                    if not task.cancelled():
-                        url_detail = task.result()
-            if url_detail.get("is_url"):
-                logger.log('DEBUG', str(url_detail))
-                return await get_result_proxy(
-                    url_detail=url_detail,
-                    session=session,
-                    url_path=url_path,
-                    headers=headers,
-                    params=params,
+        if url_detail == {}:
+            url_list = metadata_url_list(checksum)
+
+            coroutines = [
+                asyncio.ensure_future(
+                    find_result_url( url_detail=url_detail)
                 )
-            else:
-                return await get_result(
-                    url_detail=url_detail,
-                    session=session,
-                    url_path=url_path,
-                    headers=headers,
-                    params=params,
-                )
+                for url_detail in url_list
+            ]
+            done, pending = await asyncio.wait(coroutines)
+            for task in done:
+                if not task.cancelled():
+                    url_detail = task.result()
+        if url_detail.get("is_url"):
+            logger.log('DEBUG', str(url_detail))
+            return await get_result_proxy(
+                url_detail=url_detail,
+                url_path=url_path,
+                headers=headers,
+                params=params,
+            )
+        else:
+            return await get_result(
+                url_detail=url_detail,
+                url_path=url_path,
+                headers=headers,
+                params=params,
+            )
 
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION: " + str(e))
 
 
-async def get_result_proxy(url_detail, session, url_path, headers, params):
+async def get_result_proxy(url_detail, url_path, headers, params):
     """
     Create coroutine requests with asyncio to return Refget result based on metadata result using a proxy service.
     """
@@ -159,7 +157,6 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
             async with aiohttp.ClientSession(
                     raise_for_status=True, trust_env=True
             ) as proxy_session:
-                logger.log('DEBUG', str(session))
                 async with proxy_session.get(
                         url=url_detail["refget_server_url"] + url_path,
                         params=params,
@@ -187,7 +184,7 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
     return response_dict
 
 
-async def get_result(url_detail, session, url_path, headers, params):
+async def get_result(url_detail, url_path, headers, params):
     """
     Create coroutine requests with asyncio to return Refget result based on metadata result.
     """
@@ -195,26 +192,29 @@ async def get_result(url_detail, session, url_path, headers, params):
 
     if url_detail != {}:
         try:
-            async with session.get(
-                    url=url_detail["refget_server_url"] + url_path,
-                    params=params,
-                    ssl=False,
-                    headers=headers,
-            ) as response:
-                if response.status == 200:
-                    response_dict["headers"] = response.headers
-                    response_dict["status"] = response.status
-                    if response.headers.get("content-type").find("text") != -1:
-                        response_dict["response"] = await response.text()
-                    else:
-                        response_dict["response"] = await response.json()
-                        await cache_metadata(
-                            url_detail=url_detail, metadata=response_dict["response"]
-                        )
+            async with aiohttp.ClientSession(
+                    raise_for_status=True
+            ) as session:
+                async with session.get(
+                        url=url_detail["refget_server_url"] + url_path,
+                        params=params,
+                        ssl=False,
+                        headers=headers,
+                ) as response:
+                    if response.status == 200:
+                        response_dict["headers"] = response.headers
+                        response_dict["status"] = response.status
+                        if response.headers.get("content-type").find("text") != -1:
+                            response_dict["response"] = await response.text()
+                        else:
+                            response_dict["response"] = await response.json()
+                            await cache_metadata(
+                                url_detail=url_detail, metadata=response_dict["response"]
+                            )
 
-                    return response_dict
-                else:
-                    response_dict["status"] = response.status
+                        return response_dict
+                    else:
+                        response_dict["status"] = response.status
         except ClientResponseError as client_error:
             response_dict["status"] = client_error.status
 
