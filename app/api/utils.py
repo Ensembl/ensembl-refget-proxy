@@ -30,7 +30,7 @@ logging.getLogger().handlers = [InterceptHandler()]
 
 
 def is_url_valid(url):
-    if url.find("."):
+    if url.find(".") and url != "http://test.service.refget.review.ensembl.org/":
         return True
     else:
         return False
