@@ -76,8 +76,8 @@ async def find_result_url(session, url_detail):
 
     try:
 
-        logger.log("DEBUG",str(url_detail))
         if url_detail["is_url"]:
+            logger.log("DEBUG",str(url_detail))
             async with aiohttp.ClientSession(
                     raise_for_status=True, trust_env=True
             ) as proxy_session:
@@ -111,7 +111,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
 
         url_detail = await get_cached_url(checksum)
         async with aiohttp.ClientSession(
-                raise_for_status=True, trust_env=True
+                raise_for_status=True,
         ) as session:
             if url_detail == {}:
                 url_list = metadata_url_list(checksum)
