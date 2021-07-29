@@ -30,7 +30,7 @@ logging.getLogger().handlers = [InterceptHandler()]
 
 def use_proxy(url):
     if url not in REFGET_SERVER_URL_LIST_NO_PROXY:
-        return False
+        return True
     else:
         return False
 
@@ -158,7 +158,7 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
                     params=params,
                     headers=headers,
                     ssl=False,
-                    proxy=HTTP_PROXY
+                    proxy="http://hh-wwwcache.ebi.ac.uk:3128"
             ) as response:
                 if response.status == 200:
                     response_dict["headers"] = response.headers
