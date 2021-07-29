@@ -21,7 +21,7 @@ import aiohttp
 from aiohttp import ClientResponseError, ClientConnectorError
 from loguru import logger
 
-from core.config import REFGET_SERVER_URL_LIST, HTTP_PROXY, HTTPS_PROXY,REFGET_SERVER_URL_LIST_NO_PROXY
+from core.config import REFGET_SERVER_URL_LIST, HTTP_PROXY, HTTPS_PROXY, REFGET_SERVER_URL_LIST_NO_PROXY
 from core.logging import InterceptHandler
 from core.redis import cache_metadata, cache_url, get_cached_url
 
@@ -68,13 +68,12 @@ async def find_result_url(session, url_detail):
     """
 
     try:
-
         if url_detail["use_proxy"]:
             logger.log("DEBUG", url_detail)
             async with session.get(
                     url_detail["metadata_url"],
                     ssl=False,
-                    proxy="http://hh-wwwcache.ebi.ac.uk:3128"
+                    proxy=HTTP_PROXY
             ) as response:
 
                 if response.status == 200:
@@ -92,7 +91,7 @@ async def find_result_url(session, url_detail):
 
     except (ClientResponseError, ClientConnectorError) as e:
         asyncio.current_task().remove_done_callback(asyncio.current_task)
-        url_result = {"found":False}
+        url_result = {"found": False}
 
     return url_result
 
@@ -103,48 +102,43 @@ async def create_request_coroutine(checksum, url_path, headers, params):
     url_list [(tuple)]: Metadata URL list
     """
     url_detail = await get_cached_url(checksum)
-    async with aiohttp.ClientSession(
-            raise_for_status=True, read_timeout=None
-    ) as session:
-        if url_detail == {}:
-            url_list = metadata_url_list(checksum)
+    try:
+        async with aiohttp.ClientSession(
+                raise_for_status=True, read_timeout=None
+        ) as session:
+            if url_detail == {}:
+                url_list = metadata_url_list(checksum)
 
-            coroutines = [
-                asyncio.ensure_future(
-                    find_result_url(session=session, url_detail=url_detail)
+                coroutines = [
+                    asyncio.ensure_future(
+                        find_result_url(session=session, url_detail=url_detail)
+                    )
+                    for url_detail in url_list
+                ]
+                done, pending = await asyncio.wait(coroutines)
+                for task in done:
+                    if task.result().get("found", True):
+                        url_detail = task.result()
+                        break
+
+            if url_detail.get("use_proxy"):
+                return await get_result_proxy(
+                    url_detail=url_detail,
+                    session=session,
+                    url_path=url_path,
+                    headers=headers,
+                    params=params,
                 )
-                for url_detail in url_list
-            ]
-            done, pending = await asyncio.wait(coroutines)
-            for task in done:
-                if task.result().get("found", True):
-                    logger.log("DEBUG", "=====url_detail:")
-                    logger.log("DEBUG",task)
-                    logger.log("DEBUG",task.result().get("found",True))
-                    url_detail = task.result()
-                    break
-            logger.log("DEBUG", "=====url_detail:")
-            logger.log("DEBUG", url_detail)
-
-        if url_detail.get("refget_server_url") not in REFGET_SERVER_URL_LIST_NO_PROXY:
-            logger.log("DEBUG", url_detail)
-
-            return await get_result_proxy(
-                url_detail=url_detail,
-                session=session,
-                url_path=url_path,
-                headers=headers,
-                params=params,
-            )
-        else:
-            return await get_result(
-                url_detail=url_detail,
-                session=session,
-                url_path=url_path,
-                headers=headers,
-                params=params,
-            )
-
+            else:
+                return await get_result(
+                    url_detail=url_detail,
+                    session=session,
+                    url_path=url_path,
+                    headers=headers,
+                    params=params,
+                )
+    except (ClientResponseError, Exception) as e:
+        logger.log("DEBUG", e)
 
 
 async def get_result_proxy(url_detail, session, url_path, headers, params):
@@ -160,7 +154,7 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
                     params=params,
                     headers=headers,
                     ssl=False,
-                    proxy="http://hh-wwwcache.ebi.ac.uk:3128"
+                    proxy=HTTP_PROXY
             ) as response:
                 if response.status == 200:
                     response_dict["headers"] = response.headers
