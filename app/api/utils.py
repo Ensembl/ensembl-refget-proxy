@@ -92,8 +92,7 @@ async def find_result_url(session, url_detail):
 
     except (ClientResponseError, ClientConnectorError) as e:
         asyncio.current_task().remove_done_callback(asyncio.current_task)
-        asyncio.current_task().cancel()
-        url_result = {"use_proxy":True}
+        url_result = {"found":False}
 
     return url_result
 
@@ -103,8 +102,6 @@ async def create_request_coroutine(checksum, url_path, headers, params):
     Create coroutine requests with asyncio to return Refget result based on metadata result.
     url_list [(tuple)]: Metadata URL list
     """
-
-
     url_detail = await get_cached_url(checksum)
     async with aiohttp.ClientSession(
             raise_for_status=True, read_timeout=None
@@ -120,15 +117,16 @@ async def create_request_coroutine(checksum, url_path, headers, params):
             ]
             done, pending = await asyncio.wait(coroutines)
             for task in done:
-                if not task.cancelled():
+                if task.result().get("found", True):
                     logger.log("DEBUG", "=====url_detail:")
                     logger.log("DEBUG",task)
-                    logger.log("DEBUG",task.result())
-
+                    logger.log("DEBUG",task.result().get("found",True))
                     url_detail = task.result()
+                    break
             logger.log("DEBUG", "=====url_detail:")
             logger.log("DEBUG", url_detail)
-        if url_detail["use_proxy"]:
+
+        if url_detail.get("refget_server_url") not in REFGET_SERVER_URL_LIST_NO_PROXY:
             logger.log("DEBUG", url_detail)
 
             return await get_result_proxy(

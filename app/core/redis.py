@@ -20,7 +20,7 @@ import json
 import aioredis
 from loguru import logger
 
-from core.config import REDIS_HOST, REDIS_PORT
+from core.config import REDIS_HOST, REDIS_PORT, REFGET_SERVER_URL_LIST_NO_PROXY
 
 
 class RedisConnection(object):
@@ -77,7 +77,10 @@ async def get_cached_url(checksum):
                     "refget_server_url": url,
                     "checksum": checksum,
                     "metadata_url": url + "sequence/" + checksum + "/metadata",
+                    "use_proxy": True
                 }
+                if url in REFGET_SERVER_URL_LIST_NO_PROXY:
+                    url_result["use_proxy"] = False
             return url_result
     except Exception as e:
         logger.log("DEBUG", "UNHANDLED EXCEPTION" + str(e))
