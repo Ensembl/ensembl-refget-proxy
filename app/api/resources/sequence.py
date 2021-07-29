@@ -44,20 +44,19 @@ async def get_sequence(request: Request, checksum: str):
     }
     url_path = "sequence/" + checksum
 
-    try:
-        result = await create_request_coroutine(
-            checksum=checksum,
-            url_path=url_path,
-            headers=headers,
-            params=params,
-        )
-        if result["status"] == 200:
-            return responses.Response(result["response"], headers=result["headers"])
-        else:
-            return response_error_handler(result)
 
-    except (ClientResponseError, Exception) as e:
-        logger.log("DEBUG", e)
+    result = await create_request_coroutine(
+        checksum=checksum,
+        url_path=url_path,
+        headers=headers,
+        params=params,
+    )
+    if result["status"] == 200:
+        return responses.Response(result["response"], headers=result["headers"])
+    else:
+        return response_error_handler(result)
+
+
 
 
 @router.get(
