@@ -93,7 +93,7 @@ async def find_result_url(session, url_detail):
     except (ClientResponseError, ClientConnectorError) as e:
         asyncio.current_task().remove_done_callback(asyncio.current_task)
         asyncio.current_task().cancel()
-        url_result = {}
+        url_result = {"use_proxy":True}
 
     return url_result
 
@@ -121,7 +121,13 @@ async def create_request_coroutine(checksum, url_path, headers, params):
             done, pending = await asyncio.wait(coroutines)
             for task in done:
                 if not task.cancelled():
+                    logger.log("DEBUG", "=====url_detail:")
+                    logger.log("DEBUG",task)
+                    logger.log("DEBUG",task.result())
+
                     url_detail = task.result()
+            logger.log("DEBUG", "=====url_detail:")
+            logger.log("DEBUG", url_detail)
         if url_detail["use_proxy"]:
             logger.log("DEBUG", url_detail)
 
