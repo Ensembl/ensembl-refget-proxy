@@ -73,8 +73,7 @@ async def find_result_url(session, url_detail):
             logger.log("DEBUG", url_detail)
             async with session.get(
                     url_detail["metadata_url"],
-                    ssl=False,
-                    proxy=HTTP_PROXY
+                    ssl=False
             ) as response:
                 logger.log("DEBUG", response.status)
                 if response.status == 200:
@@ -156,8 +155,7 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
                     url=url_detail["refget_server_url"] + url_path,
                     params=params,
                     headers=headers,
-                    ssl=False,
-                    proxy=HTTP_PROXY
+                    ssl=False
             ) as response:
                 if response.status == 200:
                     response_dict["headers"] = response.headers
