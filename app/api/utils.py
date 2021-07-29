@@ -103,46 +103,44 @@ async def create_request_coroutine(checksum, url_path, headers, params):
     Create coroutine requests with asyncio to return Refget result based on metadata result.
     url_list [(tuple)]: Metadata URL list
     """
-    try:
 
-        url_detail = await get_cached_url(checksum)
-        async with aiohttp.ClientSession(
-                raise_for_status=True, read_timeout=None
-        ) as session:
-            if url_detail == {}:
-                url_list = metadata_url_list(checksum)
 
-                coroutines = [
-                    asyncio.ensure_future(
-                        find_result_url(session=session, url_detail=url_detail)
-                    )
-                    for url_detail in url_list
-                ]
-                done, pending = await asyncio.wait(coroutines)
-                for task in done:
-                    if not task.cancelled():
-                        url_detail = task.result()
-            if url_detail.get("use_proxy"):
-                logger.log("DEBUG", url_detail)
+    url_detail = await get_cached_url(checksum)
+    async with aiohttp.ClientSession(
+            raise_for_status=True, read_timeout=None
+    ) as session:
+        if url_detail == {}:
+            url_list = metadata_url_list(checksum)
 
-                return await get_result_proxy(
-                    url_detail=url_detail,
-                    session=session,
-                    url_path=url_path,
-                    headers=headers,
-                    params=params,
+            coroutines = [
+                asyncio.ensure_future(
+                    find_result_url(session=session, url_detail=url_detail)
                 )
-            else:
-                return await get_result(
-                    url_detail=url_detail,
-                    session=session,
-                    url_path=url_path,
-                    headers=headers,
-                    params=params,
-                )
+                for url_detail in url_list
+            ]
+            done, pending = await asyncio.wait(coroutines)
+            for task in done:
+                if not task.cancelled():
+                    url_detail = task.result()
+        if url_detail.get("use_proxy"):
+            logger.log("DEBUG", url_detail)
 
-    except Exception as e:
-        logger.log("DEBUG", "UNHANDLED EXCEPTION: " + str(e))
+            return await get_result_proxy(
+                url_detail=url_detail,
+                session=session,
+                url_path=url_path,
+                headers=headers,
+                params=params,
+            )
+        else:
+            return await get_result(
+                url_detail=url_detail,
+                session=session,
+                url_path=url_path,
+                headers=headers,
+                params=params,
+            )
+
 
 
 async def get_result_proxy(url_detail, session, url_path, headers, params):
