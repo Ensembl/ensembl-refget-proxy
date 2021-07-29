@@ -30,9 +30,9 @@ logging.getLogger().handlers = [InterceptHandler()]
 
 def use_proxy(url):
     if url not in REFGET_SERVER_URL_LIST_NO_PROXY:
-        return False
-    else:
         return True
+    else:
+        return False
 
 
 def metadata_url_list(checksum):

@@ -91,7 +91,7 @@ class APISequenceTestCase(unittest.TestCase):
             {'refget_server_url': 'http://test.service.refget.review.ensembl.org/',
              'checksum': '6681ac2f62509cfc220d78751b8dc524',
              'metadata_url': 'http://test.service.refget.review.ensembl.org/sequence/6681ac2f62509cfc220d78751b8dc524/metadata',
-             'use_proxy': True}]
+             'use_proxy': False}]
 
 
 if __name__ == "__main__":
