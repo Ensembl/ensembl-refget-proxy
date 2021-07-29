@@ -74,7 +74,7 @@ async def find_result_url(session, url_detail):
             async with session.get(
                     url_detail["metadata_url"],
                     ssl=False,
-                    proxy=HTTPS_PROXY
+                    proxy=HTTP_PROXY
             ) as response:
                 logger.log("DEBUG", response.status)
                 if response.status == 200:
