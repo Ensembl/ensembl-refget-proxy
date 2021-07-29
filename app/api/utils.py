@@ -119,7 +119,6 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                     if not task.cancelled():
                         url_detail = task.result()
             if url_detail.get("is_url"):
-                logging.log(url_detail,'DEBUg')
                 return await get_result_proxy(
                     url_detail=url_detail,
                     session=session,
