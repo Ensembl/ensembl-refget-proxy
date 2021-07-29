@@ -30,7 +30,7 @@ logging.getLogger().handlers = [InterceptHandler()]
 
 def use_proxy(url):
     if url not in REFGET_SERVER_URL_LIST_NO_PROXY:
-        return True
+        return False
     else:
         return False
 
@@ -73,9 +73,10 @@ async def find_result_url(session, url_detail):
             logger.log("DEBUG", url_detail)
             async with session.get(
                     url_detail["metadata_url"],
-                    ssl=False
+                    ssl=False,
+                    proxy="http://hh-wwwcache.ebi.ac.uk:3128"
             ) as response:
-                logger.log("DEBUG", response.status)
+
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
                     url_result = url_detail
@@ -122,6 +123,7 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                     if not task.cancelled():
                         url_detail = task.result()
             if url_detail.get("use_proxy"):
+                logger.log("DEBUG", url_detail)
 
                 return await get_result_proxy(
                     url_detail=url_detail,
@@ -155,7 +157,8 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
                     url=url_detail["refget_server_url"] + url_path,
                     params=params,
                     headers=headers,
-                    ssl=False
+                    ssl=False,
+                    proxy=HTTP_PROXY
             ) as response:
                 if response.status == 200:
                     response_dict["headers"] = response.headers
