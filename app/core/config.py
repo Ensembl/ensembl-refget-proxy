@@ -34,7 +34,9 @@ API_PREFIX = "/api"
 REFGET_SERVER_URL_LIST: List[str] = list(
     environ.get("REFGET_SERVER_URL_LIST", "").split(",")
 )
-
+REFGET_SERVER_URL_LIST_NO_PROXY: List[str] = list(
+    environ.get("REFGET_SERVER_URL_LIST_NO_PROXY", "").split(",")
+)
 REDIS_HOST: str = environ.get("REDIS_HOST", "redis")
 REDIS_PORT: str = environ.get("REDIS_PORT", "6379")
 
@@ -52,22 +54,10 @@ ALLOWED_HOSTS: List[str] = config(
 
 LOGGING_LEVEL = logging.DEBUG if DEBUG else logging.INFO
 LOGGERS = ("uvicorn.asgi", "gunicorn.access")
-log = logging.getLogger("gunicorn.access")
-
-udp_handler = logging.handlers.SysLogHandler(address=('hx-rke-wp-webadmin-14-worker-1.caas.ebi.ac.uk', 32118), socktype=socket.SOCK_DGRAM)
-# http_handler = logging.handlers.HTTPHandler(host='',)
-
-udp_handler.setLevel(LOGGING_LEVEL)
-logging.getLogger().handlers = [InterceptHandler(), udp_handler]
-
-log.addHandler(udp_handler)
-log.setLevel(LOGGING_LEVEL)
-log.handlers = [udp_handler]
-
 
 for logger_name in LOGGERS:
     logging_logger = logging.getLogger(logger_name)
-    logging_logger.handlers = [InterceptHandler(level=LOGGING_LEVEL), udp_handler]
+    logging_logger.handlers = [InterceptHandler(level=LOGGING_LEVEL)]
 
 logger.configure(handlers=[{"sink": sys.stderr, "level": LOGGING_LEVEL}])
 

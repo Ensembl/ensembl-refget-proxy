@@ -16,21 +16,20 @@
 
 import asyncio
 import logging
-import re
 
 import aiohttp
 from aiohttp import ClientResponseError, ClientConnectorError
 from loguru import logger
 
-from core.config import REFGET_SERVER_URL_LIST, HTTP_PROXY, HTTPS_PROXY
+from core.config import REFGET_SERVER_URL_LIST, HTTP_PROXY, HTTPS_PROXY,REFGET_SERVER_URL_LIST_NO_PROXY
 from core.logging import InterceptHandler
 from core.redis import cache_metadata, cache_url, get_cached_url
 
 logging.getLogger().handlers = [InterceptHandler()]
 
 
-def is_url_valid(url):
-    if url.find(".") and url != "http://test.service.refget.review.ensembl.org/":
+def use_proxy(url):
+    if url not in REFGET_SERVER_URL_LIST_NO_PROXY:
         return True
     else:
         return False
@@ -40,7 +39,7 @@ def metadata_url_list(checksum):
     """
     Create and return a list of dictionary containing:
     [{"refget_server_url": "Refget server URL", "checksum": "checksum", "metadata_url": "Generated metadata URL"), is_url:Boolean]
-    is_url: To define a proxy rule in our k8s structure and route the internal services directly to the related service.
+    use_proxy: To define a proxy rule in our k8s structure and route the internal services directly to the related service.
     """
 
     url_list = []
@@ -54,7 +53,7 @@ def metadata_url_list(checksum):
                 "refget_server_url": url,
                 "checksum": checksum,
                 "metadata_url": url + "sequence/" + str(checksum) + "/metadata",
-                "is_url": is_url_valid(url),
+                "use_proxy": use_proxy(url),
             }
         )
 
@@ -70,18 +69,23 @@ async def find_result_url(session, url_detail):
 
     try:
 
-        if url_detail["is_url"]:
-
+        if url_detail["use_proxy"]:
+            logger.log("DEBUG", url_detail)
             async with session.get(
                     url_detail["metadata_url"],
-                    proxy=HTTP_PROXY
+                    ssl=False,
+                    proxy=HTTPS_PROXY
             ) as response:
+                logger.log("DEBUG", response.status)
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
                     url_result = url_detail
         else:
+            logger.log("DEBUG", url_detail)
 
-            async with session.get(url_detail["metadata_url"]) as response:
+            async with session.get(url_detail["metadata_url"], ssl=False) as response:
+                logger.log("DEBUG", response.status)
+
                 if response.status == 200:
                     await cache_url(url_detail=url_detail)
                     url_result = url_detail
@@ -118,7 +122,8 @@ async def create_request_coroutine(checksum, url_path, headers, params):
                 for task in done:
                     if not task.cancelled():
                         url_detail = task.result()
-            if url_detail.get("is_url"):
+            if url_detail.get("use_proxy"):
+
                 return await get_result_proxy(
                     url_detail=url_detail,
                     session=session,
@@ -151,6 +156,7 @@ async def get_result_proxy(url_detail, session, url_path, headers, params):
                     url=url_detail["refget_server_url"] + url_path,
                     params=params,
                     headers=headers,
+                    ssl=False,
                     proxy=HTTP_PROXY
             ) as response:
                 if response.status == 200:
