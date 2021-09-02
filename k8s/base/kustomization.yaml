@@ -3,8 +3,8 @@ kind: Kustomization
 namespace: ensembl-experiments
 resources:
   - redis_deployment.yaml
-  - redis_service.yaml
+#  - redis_service.yaml
 #  - configmap.yaml
   - deployment.yaml
-  - service.yaml
+#  - service.yaml
 #  - service_node.yaml
