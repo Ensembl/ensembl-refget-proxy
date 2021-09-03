@@ -81,7 +81,7 @@ LOGGERS = ("uvicorn.asgi", "gunicorn.access")
 logging.config.dictConfig(LOG_CONFIG)
 log = logging.getLogger("gunicorn.access")
 udp_handler_host: str = environ.get("UDP_HANDLER_HOST", "localhost")
-udp_handler_port: int = environ.get("UDP_HANDLER_PORT", "8081")
+udp_handler_port: int = int(environ.get("UDP_HANDLER_PORT", 8081))
 udp_handler = logging.handlers.SysLogHandler(address=(udp_handler_host, udp_handler_port), socktype=socket.SOCK_DGRAM)
 
 udp_handler.setLevel(LOGGING_LEVEL)
