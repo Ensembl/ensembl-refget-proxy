@@ -13,27 +13,73 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-
+import json
 import logging
-from types import FrameType
-from typing import cast
 
-from loguru import logger
+
+import requests
+
+from core.config import HTTP_LOGGING_URL
+
+
+class JSONFormatter(logging.Formatter):
+    def __init__(self):
+        super().__init__()
+
+    def format(self, record):
+        record.msg = json.dumps(record.msg)
+        return super().format(record)
+
+
+formatter = logging.Formatter(json.dumps({
+    'time': '%(asctime)s',
+    'pathname': '%(pathname)s',
+    'line': '%(lineno)d',
+    'logLevel': '%(levelname)s',
+    'message': '%(message)s'
+}))
 
 
 class InterceptHandler(logging.Handler):
-    def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover
+
+    def emit(self, record: logging.LogRecord):  # pragma: no cover
+        log_entry = self.format(record)
+        url = HTTP_LOGGING_URL
         try:
-            level = logger.level(record.levelname).name
-        except ValueError:
-            level = str(record.levelno)
+            log_entry = log_entry.replace("<CIMultiDictProxy(", '{')
+            log_entry = log_entry.replace(')>', '}')
+            log_entry = log_entry.replace("'", '"')
+            log_entry = json.loads(log_entry)
+            log_entry = json.dumps(log_entry)
+            return requests.post(url, log_entry, headers={"Content-type": "application/json"}, ).content
 
-        frame, depth = logging.currentframe(), 2
-        while frame.f_code.co_filename == logging.__file__:  # noqa: WPS609
-            frame = cast(FrameType, frame.f_back)
-            depth += 1
+        except Exception as e:
+            print(e)
+            return requests.post(url, log_entry, headers={"Content-type": "application/json"}, ).content
 
-        logger.opt(depth=depth, exception=record.exc_info).log(
-            level,
-            record.getMessage(),
-        )
+
+
+
+# create logger
+log = logging.getLogger('')
+log.setLevel(logging.INFO)
+
+httpHandler = InterceptHandler()
+httpHandler.setLevel(logging.INFO)
+httpHandler.setFormatter(JSONFormatter())
+log.addHandler(httpHandler)
+
+# try:
+#     level = logger.level(record.levelname).name
+# except ValueError:
+#     level = str(record.levelno)
+#
+# frame, depth = logging.currentframe(), 2
+# while frame.f_code.co_filename == logging.__file__:  # noqa: WPS609
+#     frame = cast(FrameType, frame.f_back)
+#     depth += 1
+#
+# logger.opt(depth=depth, exception=record.exc_info).log(
+#     level,
+#     record.getMessage(),
+# )

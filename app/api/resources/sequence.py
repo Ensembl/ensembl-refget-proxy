@@ -19,11 +19,10 @@ import logging
 
 from aiohttp import ClientResponseError
 from fastapi import APIRouter, Request, responses
-from loguru import logger
 
 from api.error_response import response_error_handler
 from api.utils import create_request_coroutine
-from core.logging import InterceptHandler
+from core.logging import InterceptHandler, log
 from core.redis import get_cached_metadata
 
 logging.getLogger().handlers = [InterceptHandler()]
@@ -36,12 +35,14 @@ async def get_sequence(request: Request, checksum: str):
     """
     Return Refget sequence based on a sequence checksum.
     """
+
     params = request.query_params
     headers = {
         header: request.headers.get(header)
         for header in request.headers
         if header != "host"
     }
+
     url_path = "sequence/" + checksum
 
     try:
@@ -51,13 +52,16 @@ async def get_sequence(request: Request, checksum: str):
             headers=headers,
             params=params,
         )
+
+        log.info({'headers': headers, 'result': result, 'path_params': request.path_params})
+
         if result["status"] == 200:
             return responses.Response(result["response"], headers=result["headers"])
         else:
             return response_error_handler(result)
 
     except (ClientResponseError, Exception) as e:
-        logger.log("DEBUG", e)
+        log.info(e)
 
 
 @router.get(
@@ -102,4 +106,4 @@ async def get_sequence_metadata(request: Request, checksum: str):
 
     except (ClientResponseError, Exception) as e:
 
-        logger.log("DEBUG", e)
+        log.info(e)
