@@ -14,19 +14,17 @@
 #    limitations under the License.
 #
 
-import logging
 import socket
 import sys
 from logging.handlers import SocketHandler
 from os import environ
 from typing import List
 
-import requests
 from loguru import logger
 from starlette.config import Config
 from starlette.datastructures import CommaSeparatedStrings
-
-from .logging import InterceptHandler
+import logging.config
+import logging.handlers
 
 VERSION = "0.0.0"
 API_PREFIX = "/api"
@@ -73,8 +71,7 @@ LOG_CONFIG = {
         "uvicorn.error": {"propagate": True},
     },
 }
-import logging.config
-import logging.handlers
+
 LOGGING_LEVEL = logging.DEBUG if DEBUG else logging.INFO
 LOGGERS = ("uvicorn.asgi", "gunicorn.access")
 
