@@ -29,9 +29,6 @@ logging.getLogger().handlers = [InterceptHandler()]
 
 
 def use_proxy(url):
-    logger.log("DEBUG", url)
-    logger.log("DEBUG", REFGET_SERVER_URL_LIST_NO_PROXY)
-    logger.log("DEBUG", REFGET_SERVER_URL_LIST)
     if url not in REFGET_SERVER_URL_LIST_NO_PROXY:
         return True
     else:
@@ -47,7 +44,6 @@ def metadata_url_list(checksum):
 
     url_list = []
     for url in REFGET_SERVER_URL_LIST:
-        print(url)
         url = url.strip()
         if not url.endswith("/"):
             url = url + "/"

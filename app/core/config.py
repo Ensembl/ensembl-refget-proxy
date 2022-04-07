@@ -14,19 +14,17 @@
 #    limitations under the License.
 #
 
-import logging
 import socket
 import sys
 from logging.handlers import SocketHandler
 from os import environ
 from typing import List
 
-import requests
 from loguru import logger
 from starlette.config import Config
 from starlette.datastructures import CommaSeparatedStrings
-
-from .logging import InterceptHandler
+import logging.config
+import logging.handlers
 
 VERSION = "0.0.0"
 API_PREFIX = "/api"
@@ -73,8 +71,7 @@ LOG_CONFIG = {
         "uvicorn.error": {"propagate": True},
     },
 }
-import logging.config
-import logging.handlers
+
 LOGGING_LEVEL = logging.DEBUG if DEBUG else logging.INFO
 LOGGERS = ("uvicorn.asgi", "gunicorn.access")
 
@@ -83,6 +80,7 @@ log = logging.getLogger("gunicorn.access")
 udp_handler_host: str = environ.get("UDP_HANDLER_HOST", "localhost")
 udp_handler_port: int = int(environ.get("UDP_HANDLER_PORT", 8081))
 udp_handler = logging.handlers.SysLogHandler(address=(udp_handler_host, udp_handler_port), socktype=socket.SOCK_DGRAM)
+HTTP_LOGGING_URL: str = environ.get("HTTP_LOGGING_URL", "http://localhost")
 
 udp_handler.setLevel(LOGGING_LEVEL)
 logging.getLogger().handlers = [udp_handler]
