@@ -42,24 +42,29 @@ formatter = logging.Formatter(json.dumps({
 class InterceptHandler(logging.Handler):
     def send_request(self, url, log_entry):
         try:
-            return requests.post(url, log_entry, headers={"Content-type": "application/json"}, ).content
+            session = requests.Session()
+            session.trust_env = False
+
+            return session.post(url, log_entry, headers={"Content-type": "application/json"}, ).content
+
         except Exception as e:
             pass
 
-    def emit(self, record: logging.LogRecord):  # pragma: no cover
-        log_entry = self.format(record)
-        url = HTTP_LOGGING_URL
+    def refget_json_format(self, log_entry):
         try:
             log_entry = log_entry.replace("<CIMultiDictProxy(", '{')
             log_entry = log_entry.replace(')>', '}')
             log_entry = log_entry.replace("'", '"')
             log_entry = json.loads(log_entry)
-            log_entry = json.dumps(log_entry)
-            return self.send_request(url, log_entry)
-
+            return json.dumps(log_entry)
         except Exception as e:
-            print(e)
-            return self.send_request(url, log_entry)
+            return log_entry
+
+    def emit(self, record: logging.LogRecord):  # pragma: no cover
+        log_entry = self.format(record)
+        url = HTTP_LOGGING_URL
+        log_entry = self.refget_json_format(log_entry)
+        return self.send_request(url, log_entry)
 
 
 # create logger
