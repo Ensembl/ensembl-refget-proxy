@@ -56,7 +56,7 @@ class InterceptHandler(logging.Handler):
             log_entry = log_entry.replace(')>', '}')
             log_entry = log_entry.replace("'", '"')
             log_entry = json.loads(log_entry)
-            log_entry = log_entry["result"].pop("response", None)
+            log_entry["result"].pop("response", None)
 
             return json.dumps(log_entry)
         except Exception as e:
