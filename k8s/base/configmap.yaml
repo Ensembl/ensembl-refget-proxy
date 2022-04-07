@@ -13,7 +13,7 @@ data:
   REDIS_PORT: "6379"
   UDP_HANDLER_HOST: hh-rke-wp-webadmin-14-worker-4.caas.ebi.ac.uk
   UDP_HANDLER_PORT: "31704"
-  HTTP_LOGGING_URL: http://hh-rke-wp-webadmin-14-worker-4.caas.ebi.ac.uk:31908
+  HTTP_LOGGING_URL: http://ensembl-refget-proxy-logstash-service:8084
 kind: ConfigMap
 metadata:
   name: ensembl-refget-proxy-configmap
