@@ -42,7 +42,11 @@ formatter = logging.Formatter(json.dumps({
 class InterceptHandler(logging.Handler):
     def send_request(self, url, log_entry):
         try:
-            return requests.post(url, log_entry, headers={"Content-type": "application/json"}, ).content
+            session = requests.Session()
+            session.trust_env = False
+
+            return session.post(url, log_entry, headers={"Content-type": "application/json"}, ).content
+
         except Exception as e:
             pass
 
