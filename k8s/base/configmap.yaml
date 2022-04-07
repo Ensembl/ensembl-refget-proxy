@@ -3,13 +3,17 @@ data:
   DEPLOYMENT_SCHEME: http
   PORT: "8083"
   REFGET_SERVER_URL_LIST: https://www.ebi.ac.uk/ena/cram/,http://refget-perl-server-svc:8080
-  HTTP_PROXY: http://hx-wwwcache.ebi.ac.uk:3128
-  HTTPS_PROXY: http://hx-wwwcache.ebi.ac.uk:3128
-  http_proxy: http://hx-wwwcache.ebi.ac.uk:3128
-  https_proxy: http://hx-wwwcache.ebi.ac.uk:3128
+  REFGET_SERVER_URL_LIST_NO_PROXY: http://refget-perl-server-svc:8080/
+  HTTP_PROXY: http://hh-wwwcache.ebi.ac.uk:3128
+  HTTPS_PROXY: http://hh-wwwcache.ebi.ac.uk:3128
+  http_proxy: http://hh-wwwcache.ebi.ac.uk:3128
+  https_proxy: http://hh-wwwcache.ebi.ac.uk:3128
   no_proxy: localhost,.cluster.local,http://refget-perl-server-svc
   REDIS_HOST: ensembl-refget-proxy-redis-svc
   REDIS_PORT: "6379"
+  UDP_HANDLER_HOST: hh-rke-wp-webadmin-14-worker-4.caas.ebi.ac.uk
+  UDP_HANDLER_PORT: "31704"
+  HTTP_LOGGING_URL: http://hh-rke-wp-webadmin-14-worker-4.caas.ebi.ac.uk:31908
 kind: ConfigMap
 metadata:
   name: ensembl-refget-proxy-configmap
