@@ -71,8 +71,10 @@ Dev:HX:
     name: wp-hx-dev-ing
   before_script:
     - cd k8s/overlays/development
+    - kustomize edit set label environment:dev
   only:
     - master
+    - fix-selector
   when: manual
 
 Staging:HX:
