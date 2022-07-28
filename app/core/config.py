@@ -14,18 +14,15 @@
 #    limitations under the License.
 #
 
-import socket
 import sys
-from logging.handlers import SocketHandler
 from os import environ
 from typing import List
 
 from loguru import logger
 from starlette.config import Config
 from starlette.datastructures import CommaSeparatedStrings
-import logging.config
-import logging.handlers
-from logging import InterceptHandler
+
+from .logging import InterceptHandler
 
 VERSION = "0.0.0"
 API_PREFIX = "/api"
@@ -50,15 +47,16 @@ ALLOWED_HOSTS: List[str] = config(
 
 # logging configuration
 
-
 LOGGING_LEVEL = logging.DEBUG if DEBUG else logging.INFO
-LOGGERS = ("uvicorn.asgi", "gunicorn.access")
+LOGGERS = ("uvicorn.asgi", "uvicorn.access")
 
+logging.getLogger().handlers = [InterceptHandler()]
 for logger_name in LOGGERS:
     logging_logger = logging.getLogger(logger_name)
     logging_logger.handlers = [InterceptHandler(level=LOGGING_LEVEL)]
 
 logger.configure(handlers=[{"sink": sys.stderr, "level": LOGGING_LEVEL}])
+
 
 HTTP_PROXY = environ.get("HTTP_PROXY", "")
 HTTPS_PROXY = environ.get("HTTPS_PROXY", "")
