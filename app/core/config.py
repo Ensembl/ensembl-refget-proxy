@@ -25,6 +25,7 @@ from starlette.config import Config
 from starlette.datastructures import CommaSeparatedStrings
 import logging.config
 import logging.handlers
+from logging import InterceptHandler
 
 VERSION = "0.0.0"
 API_PREFIX = "/api"
