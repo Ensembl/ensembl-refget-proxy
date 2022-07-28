@@ -49,44 +49,13 @@ ALLOWED_HOSTS: List[str] = config(
 
 # logging configuration
 
-LOG_CONFIG = {
-    "version": 1,
-    "disable_existing_loggers": True,
-    "formatters": {"default": {"format": "%(asctime)s [%(process)s] %(levelname)s: %(message)s"}},
-    "handlers": {
-        "console": {
-            "formatter": "default",
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stdout",
-            "level": "INFO",
-        }
-    },
-    "root": {"handlers": ["console"], "level": "INFO"},
-    "loggers": {
-        "gunicorn": {"propagate": True},
-        "gunicorn.access": {"propagate": True},
-        "gunicorn.error": {"propagate": True},
-        "uvicorn": {"propagate": True},
-        "uvicorn.access": {"propagate": True},
-        "uvicorn.error": {"propagate": True},
-    },
-}
 
 LOGGING_LEVEL = logging.DEBUG if DEBUG else logging.INFO
 LOGGERS = ("uvicorn.asgi", "gunicorn.access")
 
-logging.config.dictConfig(LOG_CONFIG)
-log = logging.getLogger("gunicorn.access")
-udp_handler_host: str = environ.get("UDP_HANDLER_HOST", "localhost")
-udp_handler_port: int = int(environ.get("UDP_HANDLER_PORT", 8081))
-udp_handler = logging.handlers.SysLogHandler(address=(udp_handler_host, udp_handler_port), socktype=socket.SOCK_DGRAM)
-HTTP_LOGGING_URL: str = environ.get("HTTP_LOGGING_URL", "http://localhost")
-
-udp_handler.setLevel(LOGGING_LEVEL)
-logging.getLogger().handlers = [udp_handler]
-
-log.addHandler(udp_handler)
-
+for logger_name in LOGGERS:
+    logging_logger = logging.getLogger(logger_name)
+    logging_logger.handlers = [InterceptHandler(level=LOGGING_LEVEL)]
 
 logger.configure(handlers=[{"sink": sys.stderr, "level": LOGGING_LEVEL}])
 

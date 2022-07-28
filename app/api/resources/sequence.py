@@ -16,13 +16,14 @@
 
 import json
 import logging
+from loguru import logger
 
 from aiohttp import ClientResponseError
 from fastapi import APIRouter, Request, responses
 
 from api.error_response import response_error_handler
 from api.utils import create_request_coroutine
-from core.logging import InterceptHandler, log
+from core.logging import InterceptHandler
 from core.redis import get_cached_metadata
 
 logging.getLogger().handlers = [InterceptHandler()]
@@ -53,7 +54,7 @@ async def get_sequence(request: Request, checksum: str):
             params=params,
         )
 
-        log.info({'headers': headers, 'result': result, 'path_params': request.path_params})
+        logger.log("DEBUG", {'headers': headers, 'result': result, 'path_params': request.path_params})
 
         if result["status"] == 200:
             return responses.Response(result["response"], headers=result["headers"])
@@ -61,7 +62,7 @@ async def get_sequence(request: Request, checksum: str):
             return response_error_handler(result)
 
     except (ClientResponseError, Exception) as e:
-        log.info(e)
+        logger.log("DEBUG", e)
 
 
 @router.get(
@@ -106,4 +107,4 @@ async def get_sequence_metadata(request: Request, checksum: str):
 
     except (ClientResponseError, Exception) as e:
 
-        log.info(e)
+        logger.log("DEBUG", e)
