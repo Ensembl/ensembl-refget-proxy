@@ -59,7 +59,7 @@ Review:HX:
   before_script:
     - cd k8s/overlays/review
     - kustomize edit set label environment:${CI_COMMIT_REF_SLUG}
-    - kustomize edit set namesuffix ${CI_COMMIT_REF_SLUG}
+    - kustomize edit set namesuffix -- -${CI_COMMIT_REF_SLUG}
     - kustomize edit set image DOCKER_IMAGE=${DOCKER_IMAGE}
 
   except:
@@ -71,8 +71,10 @@ Dev:HX:
     name: wp-hx-dev-ing
   before_script:
     - cd k8s/overlays/development
+    - kustomize edit set label environment:dev
   only:
     - master
+    - fix-selector
   when: manual
 
 Staging:HX:
