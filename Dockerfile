@@ -14,7 +14,7 @@
 #    limitations under the License.
 #
 
-FROM tiangolo/uvicorn-gunicorn:python3.8
+FROM python:3.9
 
 EXPOSE $PORT
 RUN apt-get update && \
